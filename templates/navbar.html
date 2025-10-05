@@ -17,16 +17,6 @@
         <li class="nav-item"><a class="nav-link" href="/settings">System Settings</a></li>
         <li class="nav-item"><a class="nav-link" href="/firmware_update">Firmware</a></li>
       </ul>
-
-      <!-- 🔆 Right Section -->
-      <div class="d-flex align-items-center gap-3">
-        <a href="https://buymeacoffee.com/arduinoLab" target="_blank"
-           class="btn btn-warning btn-sm fw-bold text-dark"
-           title="Support ESP32 DC Motor Controller Project">☕ Support Project</a>
-
-        <span id="alarmStatus" class="badge bg-danger d-none">🚨 Alarm Active</span>
-        <button id="toggleDarkMode" class="btn btn-outline-light btn-sm" title="Night mode">🌙/☀️</button>
-      </div>
     </div>
   </div>
 </nav>
@@ -40,7 +30,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div id="feedbackBody"><!-- text from JS --></div>
+        <div id="feedbackBody"></div>
 
         <!-- Slider (shown only if URL provided) -->
         <div id="speedWrapper" class="mt-3 d-none">
@@ -50,42 +40,59 @@
         </div>
       </div>
 
-      <div class="modal-footer" id="feedbackFooter">
-        <!-- Buttons generated dynamically -->
-      </div>
+      <div class="modal-footer" id="feedbackFooter"></div>
     </div>
   </div>
 </div>
 
-<!-- ☕ Floating Donate Button -->
-<a href="https://buymeacoffee.com/arduinoLab" target="_blank" id="donate-float"
-   class="btn btn-warning rounded-circle shadow-lg" title="Support ESP32 DC Motor Controller Project">
-  ☕
-</a>
+<!-- ☕ + 💳 Floating Donate Buttons -->
+<div id="donate-float-container">
+  <a href="https://buymeacoffee.com/devbmv"
+     target="_blank"
+     rel="noopener noreferrer"
+     class="btn btn-warning rounded-circle shadow-lg"
+     title="☕ Support this project via Buy Me a Coffee">
+     ☕
+  </a>
+
+  <a href="https://revolut.me/mihailuf6d"
+     target="_blank"
+     rel="noopener noreferrer"
+     class="btn btn-success rounded-circle shadow-lg"
+     title="💳 Donate securely via Revolut (no fees)">
+     💳
+  </a>
+</div>
+
 
 <style>
-  #donate-float {
+  #donate-float-container {
     position: fixed;
     bottom: 22px;
     right: 22px;
+    display: flex;
+    gap: 10px;
+    z-index: 1050;
+  }
+
+  #donate-float-container a {
     width: 58px;
     height: 58px;
     font-size: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1050;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  #donate-float:hover {
+  #donate-float-container a:hover {
     transform: scale(1.1);
     box-shadow: 0 0 18px rgba(255, 193, 7, 0.7);
   }
 </style>
 
 <script>
-  // 🌙 Dark Mode
+  // 🌙 Dark Mode toggle
   const toggleBtn = document.getElementById('toggleDarkMode');
   if (localStorage.getItem('dark-mode') === 'true') {
     document.body.classList.add('dark-mode');
@@ -95,6 +102,22 @@
     localStorage.setItem('dark-mode', document.body.classList.contains('dark-mode'));
   });
 
+  // 🚀 Initialize Bootstrap UI + Navbar Behavior
+  document.addEventListener('DOMContentLoaded', () => {
+    // Activate tooltips & popovers
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => new bootstrap.Popover(el));
+
+    // 🔻 Auto-close navbar on link click (for mobile)
+    document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        const navbar = document.getElementById('navbarNavDropdown');
+        const bsCollapse = bootstrap.Collapse.getInstance(navbar);
+        if (bsCollapse) bsCollapse.hide();
+      });
+    });
+  });
+
   // 🔐 Login / Logout
   function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -102,9 +125,9 @@
     if (parts.length === 2) return parts.pop().split(';').shift();
     return null;
   }
+
   const authLink = document.getElementById('authLink');
   const session = getCookie('ESPSESSION');
-
   if (session) {
     authLink.textContent = "🚪 Logout";
     authLink.href = "#";
@@ -132,12 +155,4 @@
       modal.show();
     }
   }
-
-  // 🛠️ Bootstrap popovers / tooltips
-  document.addEventListener('DOMContentLoaded', () => {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
-    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    popoverTriggerList.map(el => new bootstrap.Popover(el));
-  });
 </script>
