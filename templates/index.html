@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 🔍 SEO Meta Tags -->
+<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+<meta name="author" content="devbmv">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- 🔗 Social & Sharing -->
+<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<meta property="og:url" content="https://your-esp32.local/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+
+  
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/bootstrap.bundle.min.js"></script>
+  <title>ESP Control Panel</title>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/navbar', { cache: 'no-store' })
+        .then(r => r.ok ? r.text() : Promise.reject())
+        .then(html => {
+          const host = document.getElementById('navbarContainer');
+          if (host) host.innerHTML = html;
+        })
+        .catch(err => console.error("Eroare la încărcarea navbar:", err));
+
+      fetchSettings();
+    });
+  </script>
+
+  <style>
+    body {
+      background: radial-gradient(1200px 600px at 10% -10%, #e3f2fd 0, #fff 60%);
+      min-height: 100vh;
+    }
+
+    #freqLive {
+      transition: color 0.3s ease, transform 0.2s ease;
+    }
+
+    #freqLive.pulse {
+      color: #0d6efd;
+      transform: scale(1.15);
+    }
+
+
+    .progress-bar.bg-primary,
+    .progress-bar.bg-info {
+      animation: glowPulse 2s ease-in-out infinite;
+    }
+
+
+    @keyframes pulseAnim {
+      0% {
+        transform: scale(1);
+        color: #0d6efd;
+      }
+
+      50% {
+        transform: scale(1.2);
+        color: #4dabf7;
+      }
+
+      100% {
+        transform: scale(1);
+        color: #0d6efd;
+      }
+    }
+
+    .pulse {
+      animation: pulseAnim 0.4s ease-in-out;
+    }
+
+
+    .nav-glass {
+      backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.6);
+      border-bottom: 1px solid rgba(13, 110, 253, 0.15);
+    }
+
+    .card {
+      border: 0;
+      border-radius: 1rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+      border: 0;
+      border-top-left-radius: 1rem !important;
+      border-top-right-radius: 1rem !important;
+      font-weight: 600;
+    }
+
+    .hdr-blue {
+      background: linear-gradient(90deg, #0d6efd, #4dabf7);
+      color: #fff;
+    }
+
+    .hdr-green {
+      background: linear-gradient(90deg, #198754, #51cf66);
+      color: #fff;
+    }
+
+    .hdr-amber {
+      background: linear-gradient(90deg, #f59f00, #ffd43b);
+      color: #2b2b2b;
+    }
+
+    .kpi {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+
+    .footer-note {
+      color: #6c757d;
+      font-size: .9rem;
+    }
+
+    .progress {
+      height: 28px;
+    }
+
+    .percent-label {
+      font-weight: 700;
+    }
+
+    .dark-mode .nav-glass {
+      background: rgba(18, 18, 18, 0.6);
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .dark-mode .card {
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .dark-mode .footer-note {
+      color: #aaa;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      background: #0d6efd;
+      border: 2px solid white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    .progress-bar {
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(13, 110, 253, 0.4);
+    }
+
+    .progress-bar.bg-info {
+      box-shadow: 0 0 15px rgba(70, 180, 255, 0.6);
+    }
+
+    .progress-bar.bg-primary {
+      box-shadow: 0 0 15px rgba(13, 110, 253, 0.6);
+    }
+
+    .progress-bar.bg-primary {
+      box-shadow: 0 0 15px rgba(13, 110, 253, 0.6);
+      animation: glowPulse 3s infinite ease-in-out;
+    }
+
+    .progress-bar.bg-warning {
+      box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+      animation: glowPulse 3s infinite ease-in-out;
+    }
+
+    .progress-bar.bg-danger {
+      box-shadow: 0 0 20px rgba(220, 53, 69, 0.7);
+      animation: glowPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes glowPulse {
+
+      0%,
+      100% {
+        opacity: 0.9;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.02);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="navbarContainer"></div>
+
+  <div class="container py-4">
+    <p id="status" class="mb-3"></p>
+
+    <div class="row g-4">
+      <!-- System temperature -->
+      <div class="col-12 col-md-4">
+        <div class="card fade-in">
+          <div class="card-header hdr-blue">System temperature</div>
+          <div class="card-body">
+            <div class="kpi mb-2"><span id="systemTemp">-- °C</span></div>
+            <div class="progress position-relative">
+              <div id="systemProgress" class="progress-bar app-bar" role="progressbar" style="width:0%"></div>
+              <span id="systemPercent"
+                class="percent-label position-absolute start-0 ps-3 top-50 translate-middle-y">0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Engine temperature -->
+      <div class="col-12 col-md-4">
+        <div class="card fade-in">
+          <div class="card-header hdr-green">Engine temperature</div>
+          <div class="card-body">
+            <div class="kpi mb-2"><span id="engineTemp">-- °C</span></div>
+            <div class="progress position-relative">
+              <div id="engineProgress" class="progress-bar app-bar" role="progressbar" style="width:0%"></div>
+              <span id="enginePercent"
+                class="percent-label position-absolute start-0 ps-3 top-50 translate-middle-y">0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fan power -->
+      <div class="col-12 col-md-4">
+        <div class="card fade-in">
+          <div class="card-header hdr-amber d-flex justify-content-between align-items-center">
+            <span>Power fan</span>
+            <span id="modeBadge" class="badge rounded-pill text-bg-secondary">MODE</span>
+          </div>
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="kpi mb-0"><span id="fanStatus">OFF</span></div>
+              <span id="fanPercent" class="fw-bold">0%</span>
+            </div>
+
+            <div class="progress position-relative">
+              <div id="fanProgress" class="progress-bar app-bar" role="progressbar" style="width:0%"></div>
+            </div>
+
+            <div class="mt-3">
+              <div class="btn-group w-100" role="group" aria-label="Mode">
+                <input type="radio" class="btn-check" name="fanMode" id="modeAuto" autocomplete="off">
+                <label class="btn btn-outline-dark" for="modeAuto" onclick="setMode('AUTO')">Auto</label>
+
+                <input type="radio" class="btn-check" name="fanMode" id="modeManual" autocomplete="off">
+                <label class="btn btn-outline-dark" for="modeManual" onclick="setMode('MANUAL')">Manual</label>
+              </div>
+            </div>
+
+            <div id="manualControl" class="mt-3 d-none">
+              <label class="form-label fw-semibold">Manual speed control</label>
+              <div class="progress position-relative" style="height: 30px; cursor: pointer;"
+                onclick="manualBarClick(event)">
+                <div id="manualProgress" class="progress-bar bg-primary" role="progressbar" style="width:0%"></div>
+                <span id="manualValueLabel"
+                  class="percent-label position-absolute start-0 ps-3 top-50 translate-middle-y text-white fw-bold">0%</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PWM Frequency Card -->
+    <div class="col-12 mt-4">
+      <div class="card border-0 shadow-sm fade-in">
+        <div class="card-header bg-gradient text-white" style="background: linear-gradient(90deg, #4dabf7, #228be6);">
+          <strong>PWM Frequency Control</strong>
+        </div>
+        <div class="card-body text-center">
+          <h5 class="text-muted mb-3">Adjust PWM frequency for the fan driver</h5>
+
+          <div class="progress position-relative mx-auto" style="height: 30px; max-width: 500px; cursor: pointer;"
+            onclick="freqBarClick(event)">
+            <div id="freqProgress" class="progress-bar bg-info" role="progressbar" style="width: 0%;"></div>
+            <span id="freqLabel" class="percent-label position-absolute start-50 translate-middle text-white fw-bold"
+              style="white-space: nowrap; text-shadow: 1px 1px 4px rgba(0,0,0,0.5);">
+              20.0 kHz
+            </span>
+
+          </div>
+
+          <div class="d-flex justify-content-between text-secondary small mt-2 mx-auto" style="max-width: 500px;">
+            <span>1 kHz</span>
+            <span>75 kHz</span>
+            <span>150 kHz</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="text-center mt-4 footer-note">
+      Made with ❤️ for ESP32. Tip: activate Dark Mode for night work.
+    </div>
+  </div>
+  <script>
+    let freqTimeout;
+
+    // === SystemSettings ===
+    const SystemSettings = {
+      hostname: "esp-device",
+      log_level: 2,
+      telemetry_enabled: false,
+      fs_format_on_fail: true,
+
+      // Network & OTA
+      wifi_ssid: "",
+      wifi_pass: "",
+      ota_enabled: false,
+      ota_url: "",
+
+      // Temperature & ADC
+      min_rotation_temp: 25,
+      max_rotation_temp: 50,
+      system_temp_alert: 90,
+      temp_sample_interval_ms: 1000,
+      adc_samples: 8,
+      temp_sensor_type: "DS18B20",
+
+      // Fan control
+      fan_mode: "AUTO",
+      fan_control_interval: 1000,
+      fan_start_boost_ms: 300,
+      pwm_freq_hz: 3000,
+      pwm_channel: 0,
+      pwm_resolution_bits: 8,
+      invert_pwm: false,
+      manual_percent: 0,
+      manual_on: false,
+
+      // UI mapping
+      ui_system_min: 0,
+      ui_system_max: 100,
+      ui_engine_min: 0,
+      ui_engine_max: 100,
+
+      deactivateAlarmTime: 0,
+      alarmTriggered: false,
+      reactivateAlarmCounter: 0
+    };
+
+    // === SystemInfo ===
+    const SystemInfo = {
+      systemC: 0.0,
+      engineC: 0.0,
+      ts: 0,
+      targetPercent: 0.0,
+      target_pwm: 0
+    };
+    function manualBarClick(event) {
+      const bar = event.currentTarget;
+      const rect = bar.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const percent = Math.round((x / rect.width) * 100);
+      if (bar.classList.contains("busy")) return;
+      bar.classList.add("busy");
+      setTimeout(() => bar.classList.remove("busy"), 700);
+
+      SystemSettings.manual_percent = percent;
+      document.getElementById("manualProgress").style.width = percent + "%";
+      document.getElementById("manualValueLabel").textContent = percent + "%";
+
+      fetch(`/set_manual_percent?value=${encodeURIComponent(percent)}`, { method: "POST" })
+        .then(r => r.text())
+        .then(msg => showModal(msg, true))
+        .catch(() => showModal("❌ Error setting manual speed.", false));
+    }
+
+    function freqBarClick(event) {
+      const bar = event.currentTarget;
+      const rect = bar.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const percent = (x / rect.width);
+      const freq = Math.round(1000 + percent * (150000 - 1000));
+      if (bar.classList.contains("busy")) return;
+      bar.classList.add("busy");
+      setTimeout(() => bar.classList.remove("busy"), 700);
+
+      SystemSettings.pwm_freq_hz = freq;
+
+      const width = Math.round(percent * 100);
+      document.getElementById("freqProgress").style.width = width + "%";
+      document.getElementById("freqLabel").textContent = formatFreq(freq);
+
+      clearTimeout(freqTimeout);
+      freqTimeout = setTimeout(() => {
+        fetch(`/set_pwm_freq?freq=${encodeURIComponent(freq)}`, { method: "POST" })
+          .then(res => res.text())
+          .then(msg => showModal("✅ Frequency set to " + formatFreq(freq), true))
+          .catch(() => showModal("❌ Error setting frequency.", false));
+      }, 600);
+    }
+
+    async function fetchSettings() {
+      try {
+        const res = await fetch("/api/settings", { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const data = await res.json();
+        Object.assign(SystemSettings, data);
+
+        const freqPct = ((SystemSettings.pwm_freq_hz - 1000) / (150000 - 1000)) * 100;
+        document.getElementById("freqProgress").style.width = freqPct + "%";
+        document.getElementById("freqLabel").textContent = formatFreq(SystemSettings.pwm_freq_hz);
+
+        updateData();
+      } catch (err) {
+        console.error("❌ Failed to fetch settings:", err);
+      }
+    }
+
+    async function fetchSensorData() {
+      try {
+        const res = await fetch("/api/sensors", { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const data = await res.json();
+
+        SystemInfo.systemC = data.systemC;
+        SystemInfo.engineC = data.engineC;
+        SystemInfo.ts = data.ts;
+        SystemSettings.manual_percent = data.manual_percent ?? SystemSettings.manual_percent;
+        SystemInfo.targetPercent = data.targetPercent ?? SystemInfo.targetPercent;
+        SystemInfo.target_pwm = data.target_pwm ?? SystemInfo.target_pwm;
+
+        updateData();
+      } catch (err) {
+        console.error("❌ Failed to fetch sensor data:", err);
+      }
+    }
+
+    setInterval(fetchSensorData, 2000);
+    setInterval(fetchSettings, 10000);
+
+    const ENGINE_MIN = 0, ENGINE_MAX = 100, SYSTEM_MIN = 0, SYSTEM_MAX = 100;
+    function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+
+    // ---------- Dark Mode ----------
+    function initDark() {
+      const saved = localStorage.getItem('dark-mode') === '1';
+      document.body.classList.toggle('dark-mode', saved);
+      const btn = document.getElementById('btnDark');
+      if (btn) {
+        btn.classList.toggle('btn-outline-light', saved);
+        btn.classList.toggle('btn-outline-dark', !saved);
+        btn.textContent = saved ? '☀️ Light' : '🌙 Dark';
+      }
+    }
+
+    function toggleDarkMode() {
+      const on = !document.body.classList.contains('dark-mode');
+      document.body.classList.toggle('dark-mode', on);
+      localStorage.setItem('dark-mode', on ? '1' : '0');
+      const btn = document.getElementById('btnDark');
+      if (btn) {
+        btn.classList.toggle('btn-outline-light', on);
+        btn.classList.toggle('btn-outline-dark', !on);
+        btn.textContent = on ? '☀️ Light' : '🌙 Dark';
+      }
+    }
+
+    // ---------- Control Functions ----------
+    function setMode(val) {
+      SystemSettings.fan_mode = val;
+      updateData();
+      fetch('/set_mode?value=' + encodeURIComponent(val), { cache: 'no-store' })
+        .then(() => console.log("✅ Mode changed to", val))
+        .catch(err => console.error("❌ Error changing mode:", err));
+    }
+    function formatFreq(val) {
+      val = Number(val);
+      return val >= 1000 ? (val / 1000).toFixed(1) + " kHz" : val + " Hz";
+    }
+
+
+
+
+    function setManualSpeed(val) {
+      document.getElementById("manualValue").textContent = val;
+      document.getElementById("manual_percent").value = val;
+      SystemSettings.manual_percent = Number(val);
+      fetch(`/set_manual_percent?value=${encodeURIComponent(val)}`, { method: "POST" })
+        .then(r => r.text())
+        .then(msg => showModal(msg, true))
+        .catch(() => showModal("❌ Error setting manual speed.", false));
+    }
+    function getProgressColor(pct) {
+      if (pct < 60) return 'bg-primary';     // normal (albastru)
+      if (pct < 80) return 'bg-warning';     // atenție (galben)
+      return 'bg-danger';                    // critic (roșu)
+    }
+    function updateData() {
+      // === System Temp ===
+      const sysT = Number(SystemInfo.systemC) || 0;
+      document.getElementById('systemTemp').textContent = sysT.toFixed(1) + ' °C';
+      const sysPct = Math.round(clamp01((sysT - SYSTEM_MIN) / (SYSTEM_MAX - SYSTEM_MIN)) * 100);
+      const sbar = document.getElementById('systemProgress');
+      const slbl = document.getElementById('systemPercent');
+      sbar.style.width = sysPct + '%';
+      slbl.textContent = sysPct + '%';
+      sbar.className = 'progress-bar app-bar ' + getProgressColor(sysPct);
+
+      // === Engine Temp ===
+      const engT = Number(SystemInfo.engineC) || 0;
+      document.getElementById('engineTemp').textContent = engT.toFixed(1) + ' °C';
+      const engPct = Math.round(clamp01((engT - ENGINE_MIN) / (ENGINE_MAX - ENGINE_MIN)) * 100);
+      const ebar = document.getElementById('engineProgress');
+      const elbl = document.getElementById('enginePercent');
+      ebar.style.width = engPct + '%';
+      elbl.textContent = engPct + '%';
+      ebar.className = 'progress-bar app-bar ' + getProgressColor(engPct);
+
+      // === Fan ===
+      const isManual = SystemSettings.fan_mode === "MANUAL";
+      const percent = isManual ? Number(SystemSettings.manual_percent) || 0 : Number(SystemInfo.targetPercent) || 0;
+      document.getElementById('fanStatus').textContent = percent > 0 ? 'ON' : 'OFF';
+      document.getElementById('fanPercent').textContent = percent + '%';
+      const fbar = document.getElementById('fanProgress');
+      fbar.style.width = percent + '%';
+      fbar.className = 'progress-bar app-bar ' + getProgressColor(percent);
+
+      const badge = document.getElementById('modeBadge');
+      badge.textContent = isManual ? 'MANUAL' : 'AUTO';
+      badge.className = 'badge rounded-pill ' + (isManual ? 'text-bg-dark' : 'text-bg-primary');
+
+      document.getElementById('manualControl').classList.toggle('d-none', !isManual);
+      document.getElementById('modeAuto').checked = !isManual;
+      document.getElementById('modeManual').checked = isManual;
+
+      // === Manual Mode Progress ===
+      if (isManual) {
+        const val = SystemSettings.manual_percent || 0;
+        const bar = document.getElementById("manualProgress");
+        const lbl = document.getElementById("manualValueLabel");
+        bar.style.width = val + "%";
+        lbl.textContent = val + "%";
+      }
+
+      // === Frequency Bar Progress ===
+      const freqPct = ((SystemSettings.pwm_freq_hz - 1000) / (150000 - 1000)) * 100;
+      document.getElementById("freqProgress").style.width = freqPct + "%";
+      document.getElementById("freqLabel").textContent = formatFreq(SystemSettings.pwm_freq_hz);
+
+    }
+
+    function restartESP() {
+      const status = document.getElementById("status");
+      status.textContent = "Restarting ESP... (wait 5 seconds)";
+      fetch("/restart")
+        .then(() => showModal("🔄 ESP is restarting... Please wait.", true))
+        .catch(() => showModal("❌ Restart failed.", false));
+    }
+  </script>
+
+  <!-- ⚡ Scripts -->
+  <script src="/bootstrap.bundle.min.js"></script>
+  <script src="/global.js"></script>
+</body>
+
+</html>

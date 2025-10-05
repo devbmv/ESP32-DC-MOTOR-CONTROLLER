@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link href="/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex justify-content-center align-items-center vh-100">
+  <form class="bg-white p-4 rounded shadow" style="min-width:300px;" method="POST" action="/login">
+    <h4 class="mb-3">🔐 Autentificare</h4>
+    <div class="mb-3">
+      <label>Utilizator</label>
+      <input type="text" name="username" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Parolă</label>
+      <input type="password" name="password" class="form-control" required>
+    </div>
+    <button class="btn btn-primary w-100" type="submit">Login</button>
+  </form>
+</body>
+</html>

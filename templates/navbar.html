@@ -1,0 +1,143 @@
+<!-- 🌐 Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold text-info" href="/">⚙️ ESP32-S3 DC MOTOR CONTROLLER</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="/">Main Page</a></li>
+        <li class="nav-item"><a class="nav-link" href="/log_function_execution">Log</a></li>
+        <li class="nav-item"><a class="nav-link" href="/fan">Fan</a></li>
+        <li class="nav-item"><a class="nav-link" href="/wifi">WiFi Info</a></li>
+        <li class="nav-item"><a class="nav-link" href="/log_page">System Info</a></li>
+        <li class="nav-item"><a class="nav-link" href="/login.html" id="authLink">🔐 Login</a></li>
+        <li class="nav-item"><a class="nav-link" href="/settings">System Settings</a></li>
+        <li class="nav-item"><a class="nav-link" href="/firmware_update">Firmware</a></li>
+      </ul>
+
+      <!-- 🔆 Right Section -->
+      <div class="d-flex align-items-center gap-3">
+        <a href="https://buymeacoffee.com/arduinoLab" target="_blank"
+           class="btn btn-warning btn-sm fw-bold text-dark"
+           title="Support ESP32 DC Motor Controller Project">☕ Support Project</a>
+
+        <span id="alarmStatus" class="badge bg-danger d-none">🚨 Alarm Active</span>
+        <button id="toggleDarkMode" class="btn btn-outline-light btn-sm" title="Night mode">🌙/☀️</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- 📢 Modal global -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow rounded-4">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="feedbackLabel">ℹ️ ESP Notification</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="feedbackBody"><!-- text from JS --></div>
+
+        <!-- Slider (shown only if URL provided) -->
+        <div id="speedWrapper" class="mt-3 d-none">
+          <label for="manualSpeedInput" class="form-label">Manual speed (%)</label>
+          <input id="manualSpeedInput" type="range" min="0" max="100" step="1" class="form-range">
+          <div><span id="manualSpeedValue">0</span>%</div>
+        </div>
+      </div>
+
+      <div class="modal-footer" id="feedbackFooter">
+        <!-- Buttons generated dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ☕ Floating Donate Button -->
+<a href="https://buymeacoffee.com/arduinoLab" target="_blank" id="donate-float"
+   class="btn btn-warning rounded-circle shadow-lg" title="Support ESP32 DC Motor Controller Project">
+  ☕
+</a>
+
+<style>
+  #donate-float {
+    position: fixed;
+    bottom: 22px;
+    right: 22px;
+    width: 58px;
+    height: 58px;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  #donate-float:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(255, 193, 7, 0.7);
+  }
+</style>
+
+<script>
+  // 🌙 Dark Mode
+  const toggleBtn = document.getElementById('toggleDarkMode');
+  if (localStorage.getItem('dark-mode') === 'true') {
+    document.body.classList.add('dark-mode');
+  }
+  toggleBtn?.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('dark-mode', document.body.classList.contains('dark-mode'));
+  });
+
+  // 🔐 Login / Logout
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+  const authLink = document.getElementById('authLink');
+  const session = getCookie('ESPSESSION');
+
+  if (session) {
+    authLink.textContent = "🚪 Logout";
+    authLink.href = "#";
+    authLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      fetch('/logout', { method: 'POST' })
+        .then(() => {
+          document.cookie = "ESPSESSION=; Path=/; Max-Age=0";
+          window.location.href = '/login.html';
+        })
+        .catch(() => showModal("Logout failed!", false));
+    });
+  }
+
+  // 📢 Global modal display
+  function showModal(message, success = true) {
+    const body = document.getElementById('feedbackBody');
+    const header = document.getElementById('feedbackLabel');
+    if (body) body.innerHTML = message;
+    if (header) header.textContent = success ? "✅ Success" : "❌ Error";
+
+    const modalEl = document.getElementById('feedbackModal');
+    if (modalEl) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+  }
+
+  // 🛠️ Bootstrap popovers / tooltips
+  document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    popoverTriggerList.map(el => new bootstrap.Popover(el));
+  });
+</script>

@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- 🔍 SEO Meta Tags -->
+<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+<meta name="author" content="devbmv">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- 🔗 Social & Sharing -->
+<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<meta property="og:url" content="https://your-esp32.local/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+
+  
+  <title>ESP32 Smart Fan Dashboard</title>
+  <link rel="icon" href="https://www.svgrepo.com/show/530433/temperature.svg" type="image/svg+xml">
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #111a2b;
+      --muted: #9fb3c8;
+      --ok: #20c997;
+      --warn: #ffc107;
+      --bad: #ff6b6b;
+      --accent: #4dabf7;
+      --donate: #1a263b;
+    }
+
+    /* === Global Layout === */
+    html,
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Ubuntu, sans-serif;
+      background: var(--bg);
+      color: #e6eef7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wrap {
+      flex: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* === Titles === */
+    h1 {
+      font-weight: 600;
+      font-size: 22px;
+      margin: 10px 0 16px;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    /* === Grid Layout === */
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    /* === Cards === */
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .card h2 {
+      font-size: 16px;
+      margin: 0 0 10px;
+      color: #cfe6ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .k {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .v {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 6px 0;
+    }
+
+    /* === Badges === */
+    .badge {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .ok {
+      background: #123428;
+      border-color: #20664f;
+      color: #9af5d4;
+    }
+
+    .warn {
+      background: #3a300a;
+      border-color: #7d6a11;
+      color: #ffe28a;
+    }
+
+    .bad {
+      background: #3b1212;
+      border-color: #7d2222;
+      color: #ff9b9b;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .mono {
+      font-family: monospace;
+    }
+
+    /* === Footer === */
+    .footer {
+      text-align: center;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* === Donation Section === */
+    .donate {
+      background: var(--donate);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 25px;
+      border: 1px solid rgba(255, 255, 255, .1);
+    }
+
+    .donate h3 {
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    .btn-revolut {
+      background: #0075f6;
+    }
+
+    .btn-revolut:hover {
+      background: #005ed1;
+    }
+
+    .btn-paypal {
+      background: #ffc439;
+      color: #000;
+    }
+
+    .btn-paypal:hover {
+      background: #e5b100;
+      color: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>ESP32 Smart Fan Dashboard</h1>
+
+    <!-- === Status Cards Grid === -->
+    <div class="grid">
+      <div class="card" id="card-sys">
+        <h2>🌡️ System Temperature</h2>
+        <div class="v" id="sysTemp">--.– °C</div>
+        <div class="row"><span class="k">Alert at</span><span class="badge" id="sysAlert">-- °C</span></div>
+      </div>
+
+      <div class="card" id="card-eng">
+        <h2>🔥 Engine Temperature</h2>
+        <div class="v" id="engTemp">--.– °C</div>
+        <div class="row"><span class="k">Range</span><span class="badge" id="engRange">-- / -- °C</span></div>
+      </div>
+
+      <div class="card" id="card-fan">
+        <h2>🌀 Fan Control</h2>
+        <div class="row"><span class="k">Mode</span><span class="badge" id="fanMode">–</span></div>
+        <div class="row"><span class="k">Manual</span><span class="badge" id="fanMan">–</span></div>
+        <div class="row"><span class="k">Target %</span><span class="badge" id="fanPct">– %</span></div>
+        <div class="row"><span class="k">PWM</span><span class="badge mono" id="fanPwm">– / –</span></div>
+      </div>
+
+      <div class="card" id="card-wifi">
+        <h2>📶 Wi-Fi & System</h2>
+        <div class="row"><span class="k">SSID</span><span class="small" id="ssid">–</span></div>
+        <div class="row"><span class="k">IP</span><span class="small mono" id="ip">–</span></div>
+        <div class="row"><span class="k">RSSI</span><span class="badge" id="rssi">– dBm</span></div>
+        <div class="row"><span class="k">Uptime</span><span class="small" id="uptime">–</span></div>
+        <div class="row"><span class="k">Heap</span><span class="small mono" id="heap">– B</span></div>
+      </div>
+
+      <div class="card" id="card-hw">
+        <h2>🔧 Hardware / ADC</h2>
+        <div class="row"><span class="k">Pins</span><span class="small" id="pins">–</span></div>
+        <div class="row"><span class="k">PWM</span><span class="small" id="pwmCfg">–</span></div>
+        <div class="row"><span class="k">ADC</span><span class="small" id="adcCfg">–</span></div>
+      </div>
+
+      <div class="card" id="card-thresholds">
+        <h2>🛡️ Thresholds & Timers</h2>
+        <div class="row"><span class="k">Min/Max Rotation</span><span class="small" id="minmax">–</span></div>
+        <div class="row"><span class="k">Intervals</span><span class="small" id="intervals">–</span></div>
+      </div>
+    </div>
+
+    <!-- === Donation Section === -->
+    <div class="donate">
+      <h3>💖 Support this Open-Source Project</h3>
+      <p>Help improve the ESP32 Control System by making a small donation.</p>
+      <div>
+        <a href="https://revolut.me/maik775" class="btn btn-revolut" target="_blank">💸 Donate via Revolut</a>
+        <a href="https://www.paypal.me/devbmv" class="btn btn-paypal" target="_blank">☕ Support on PayPal</a>
+      </div>
+      <p class="muted small mt-2">Thank you for your support — every bit counts!</p>
+    </div>
+
+    <div class="footer muted small">
+      Auto-refresh every 5 seconds • <span id="lastUpdate">–</span>
+    </div>
+  </div>
+
+  <!-- === JavaScript Logic === -->
+  <script>
+    const $ = id => document.getElementById(id);
+
+    // Define badge colors based on temperature
+    function badgeClass(temp, alert) {
+      if (isNaN(temp)) return "badge";
+      if (temp >= alert) return "badge bad";
+      if (temp >= alert - 5) return "badge warn";
+      return "badge ok";
+    }
+
+    // Format numeric values
+    function fmt(v, unit = "") {
+      return (v == null || Number.isNaN(v))
+        ? "–"
+        : (typeof v === "number" ? v.toFixed(1) : v) + (unit || "");
+    }
+
+    // Current time string
+    function nowTime() {
+      return new Date().toLocaleTimeString();
+    }
+
+    // Fetch status data from API
+    async function load() {
+      try {
+        const r = await fetch('/api/status', { cache: 'no-store' });
+        const j = await r.json();
+
+        // --- Temperature section ---
+        const sys = j.temps?.system;
+        const eng = j.temps?.engine;
+        const alert = j.logic?.system_alert ?? 85;
+
+        $('sysTemp').textContent = fmt(sys, " °C");
+        $('engTemp').textContent = fmt(eng, " °C");
+        $('sysAlert').textContent = fmt(alert, " °C");
+        $('engRange').textContent =
+          (j.settings?.ui?.engine_min ?? "–") + " / " +
+          (j.settings?.ui?.engine_max ?? "–") + " °C";
+        $('sysAlert').className = badgeClass(sys, alert);
+
+        // --- Fan section ---
+        $('fanMode').textContent = j.fan?.mode ?? "–";
+        $('fanMan').textContent = (j.fan?.manual_on ? "ON" : "OFF");
+        $('fanPct').textContent = (j.fan?.target_percent ?? "–") + " %";
+        $('fanPwm').textContent =
+          (j.fan?.sensorData?.target_pwm ?? "–") + " / " + (j.fan?.pwm_max ?? "–");
+
+        // --- Wi-Fi / System ---
+        $('ssid').textContent = j.sys?.wifi?.ssid ?? "–";
+        $('ip').textContent = j.sys?.wifi?.ip ?? "–";
+        $('rssi').textContent = (j.sys?.wifi?.rssi ?? "–") + " dBm";
+        $('uptime').textContent = j.sys?.uptime ?? "–";
+        $('heap').textContent = (j.sys?.heap_free ?? "–") + " B";
+
+        // --- Hardware section ---
+        $('pins').textContent =
+          `sys:${j.hw?.pins?.system_temp_pin} eng:${j.hw?.pins?.engine_temp_pin} fan:${j.hw?.pins?.fan_control_pin}`;
+        $('pwmCfg').textContent =
+          `ch:${j.hw?.pwm?.channel} ${j.hw?.pwm?.freq_hz}Hz ${j.hw?.pwm?.resolution_bits}bit inv:${j.hw?.pwm?.invert ? 'Y' : 'N'}`;
+        $('adcCfg').textContent =
+          `VREF:${j.hw?.adc?.VREF} ADC_MAX:${j.hw?.adc?.ADC_MAX} R_FIXED:${j.hw?.adc?.R_FIXED} β:${j.hw?.adc?.NTC_BETA}`;
+
+        // --- Thresholds ---
+        $('minmax').textContent =
+          `${j.logic?.min_rotation} / ${j.logic?.max_rotation} °C`;
+        const i = j.logic?.intervals;
+        $('intervals').textContent =
+          `temp:${i?.temp_sample_ms}ms adc:${i?.adc_samples} eng:${i?.engine_read_ms}ms fan:${i?.fan_control_ms}ms`;
+
+        $('lastUpdate').textContent = `Last update: ${nowTime()}`;
+      } catch (e) {
+        $('lastUpdate').textContent = '⚠️ Fetch error';
+        console.error(e);
+      }
+    }
+
+    // Initial load and auto-refresh every 5s
+    document.addEventListener('DOMContentLoaded', () => {
+      load();
+      setInterval(load, 5000);
+    });
+  </script>
+</body>
+</html>

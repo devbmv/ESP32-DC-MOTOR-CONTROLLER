@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+  <!-- 🔍 SEO Meta Tags -->
+<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+<meta name="author" content="devbmv">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- 🔗 Social & Sharing -->
+<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<meta property="og:url" content="https://your-esp32.local/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/bootstrap.bundle.min.js"></script>
+  <meta charset="UTF-8">
+  <title>ESP Control Panel</title>
+
+</head>
+
+
+<body>
+  <!-- include navbar.html -->
+  <div id="navbarContainer"></div>
+  <script>
+    fetch('/navbar', { cache: 'no-store' })
+      .then(res => res.text())
+      .then(html => document.getElementById("navbarContainer").innerHTML = html)
+      .catch(err => console.error("Eroare la încărcarea navbar:", err));
+  </script>
+
+    <div class="container py-3">
+        <div class="page-title">
+            <h1 class="m-0">⚙️ SystemSettings</h1>
+            <span id="saveBadge" class="badge rounded-pill text-bg-secondary">Not saved</span>
+            <div class="ms-auto">
+                <button class="btn btn-outline-dark" id="btnDark" onclick="toggleDark()">🌙 Dark</button>
+                <a href="/index" class="btn btn-outline-primary">🏠 Dashboard</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- GENERAL -->
+            <div class="col-12 col-lg-6">
+                <div class="card fade-in">
+                    <div class="card-header hdr hdr-blue">General</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Hostname</label>
+                            <input id="hostname" class="form-control" placeholder="esp-device" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Log level</label>
+                            <select id="log_level" class="form-select">
+                                <option value="0">0 - Silent</option>
+                                <option value="1">1 - Errors</option>
+                                <option value="2">2 - Info</option>
+                                <option value="3">3 - Debug</option>
+                            </select>
+                            <div class="form-text">Nivelul de logging pentru Serial.</div>
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="telemetry_enabled">
+                            <label class="form-check-label" for="telemetry_enabled">Enable telemetry</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="fs_format_on_fail">
+                            <label class="form-check-label" for="fs_format_on_fail">Auto-format FS on fail</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NETWORK / OTA -->
+            <div class="col-12 col-lg-6">
+                <div class="card fade-in">
+                    <div class="card-header hdr hdr-cyan">Network & OTA</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">WiFi SSID</label>
+                            <input id="wifi_ssid" class="form-control" placeholder="MyWiFi" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">WiFi Password</label>
+                            <input id="wifi_pass" class="form-control" placeholder="••••••••" type="password" />
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="ota_enabled">
+                            <label class="form-check-label" for="ota_enabled">Enable OTA</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">OTA URL</label>
+                            <input id="ota_url" class="form-control" placeholder="http(s)://host/firmware.bin" />
+                            <div class="form-text">Lăsați gol dacă nu folosiți OTA over HTTP.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TEMPERATURE LIMITS -->
+            <div class="col-12 col-xl-6">
+                <div class="card fade-in">
+                    <div class="card-header hdr hdr-green">Temperature thresholds</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Engine min (°C)</label>
+                                <input id="min_rotation_temp" type="number" class="form-control" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Engine max (°C)</label>
+                                <input id="max_rotation_temp" type="number" class="form-control" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">System cutoff (°C)</label>
+                                <input id="system_temp_alert" type="number" class="form-control" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Temp sample interval (ms)</label>
+                                <input id="temp_sample_interval_ms" type="number" class="form-control" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">ADC samples per read</label>
+                                <input id="adc_samples" type="number" class="form-control" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Sensor type</label>
+                                <select id="temp_sensor_type" class="form-select">
+                                    <option value="DS18B20">DS18B20</option>
+                                    <option value="NTC_10K">NTC 10k</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="section-help mt-2">În mod AUTO, viteza ventilatorului se mapează liniar între Engine
+                            min/max.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAN CONTROL -->
+            <div class="col-12 col-xl-6">
+                <div class="card fade-in">
+                    <div class="card-header hdr hdr-amber">Fan control</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Control interval (ms)</label>
+                                <input id="fan_control_interval" type="number" class="form-control" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Start boost (ms)</label>
+                                <input id="fan_start_boost_ms" type="number" class="form-control" />
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">PWM freq (Hz)</label>
+                                <input id="pwm_freq_hz" type="number" class="form-control" />
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">PWM channel</label>
+                                <input id="pwm_channel" type="number" class="form-control" />
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">PWM resolution (bits)</label>
+                                <input id="pwm_resolution_bits" type="number" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="invert_pwm">
+                            <label class="form-check-label" for="invert_pwm">Invert PWM output</label>
+                        </div>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="manual_on">
+                            <label class="form-check-label" for="manual_on">Manual ON (when in MANUAL)</label>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">Manual speed (%)</label>
+                            <input id="manual_percent" type="range" min="0" max="100" step="1" class="form-range" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UI / PROGRESS MAPPING -->
+            <div class="col-12">
+                <div class="card fade-in">
+                    <div class="card-header hdr hdr-pink">UI progress mapping</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <label class="form-label">System min (°C)</label>
+                                <input id="ui_system_min" type="number" class="form-control" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label">System max (°C)</label>
+                                <input id="ui_system_max" type="number" class="form-control" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label">Engine min (°C)</label>
+                                <input id="ui_engine_min" type="number" class="form-control" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label">Engine max (°C)</label>
+                                <input id="ui_engine_max" type="number" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="section-help mt-2">Aceste valori afectează doar procentul vizual din Dashboard.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sticky footer actions -->
+        <div class="sticky-actions mt-4 p-3 rounded-3">
+            <div class="d-flex gap-2 justify-content-end">
+                <button class="btn btn-outline-secondary" onclick="loadDefaults()">Reset to defaults</button>
+                <button class="btn btn-outline-danger" onclick="restartESP()">Restart</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save changes</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // ---- Dark Mode persist ----
+        (function initDark() {
+            const saved = localStorage.getItem('dark-mode') === '1';
+            document.body.classList.toggle('dark-mode', saved);
+            const btn = document.getElementById('btnDark');
+            if (btn) {
+                btn.classList.toggle('btn-outline-light', saved);
+                btn.classList.toggle('btn-outline-dark', !saved);
+                btn.textContent = saved ? '☀️ Light' : '🌙 Dark';
+            }
+        })();
+
+        function toggleDark() {
+            const on = !document.body.classList.contains('dark-mode');
+            document.body.classList.toggle('dark-mode', on);
+            localStorage.setItem('dark-mode', on ? '1' : '0');
+            const btn = document.getElementById('btnDark');
+            btn.classList.toggle('btn-outline-light', on);
+            btn.classList.toggle('btn-outline-dark', !on);
+            btn.textContent = on ? '☀️ Light' : '🌙 Dark';
+        }
+
+        // ---- Helpers ----
+        const ids = [
+            'hostname', 'log_level', 'telemetry_enabled', 'fs_format_on_fail',
+            'wifi_ssid', 'wifi_pass', 'ota_enabled', 'ota_url',
+            'min_rotation_temp', 'max_rotation_temp', 'system_temp_alert', 'temp_sample_interval_ms', 'adc_samples', 'temp_sensor_type',
+            'fan_control_interval', 'fan_start_boost_ms', 'pwm_freq_hz', 'pwm_channel', 'pwm_resolution_bits', 'invert_pwm', 'manual_on', 'manual_percent',
+            'ui_system_min', 'ui_system_max', 'ui_engine_min', 'ui_engine_max'
+        ];
+
+        function setSavedBadge(ok) {
+            const b = document.getElementById('saveBadge');
+            if (!b) return;
+            b.className = 'badge rounded-pill ' + (ok ? 'text-bg-success' : 'text-bg-danger');
+            b.textContent = ok ? 'Saved' : 'Error';
+            setTimeout(() => {
+                b.className = 'badge rounded-pill text-bg-secondary';
+                b.textContent = 'Not saved';
+            }, 2000);
+        }
+
+        // ---- Load settings ----
+        document.addEventListener('DOMContentLoaded', loadSettings);
+
+        function loadSettings() {
+            fetch('/api/settings', { cache: 'no-store' })
+                .then(r => r.json())
+                .then(cfg => {
+                    ids.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+                        const val = cfg[id];
+                        if (el.type === 'checkbox') el.checked = !!val;
+                        else el.value = (val === undefined || val === null) ? '' : val;
+                    });
+                })
+                .catch(() => setSavedBadge(false));
+        }
+
+        function loadDefaults() {
+            fetch('/api/settings/defaults', { cache: 'no-store' })
+                .then(r => r.json())
+                .then(cfg => {
+                    ids.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+                        const val = cfg[id];
+                        if (el.type === 'checkbox') el.checked = !!val;
+                        else el.value = (val === undefined || val === null) ? '' : val;
+                    });
+                    setSavedBadge(true);
+                })
+                .catch(() => setSavedBadge(false));
+        }
+
+function saveSettings() {
+  const payload = {
+    hostname: document.getElementById("hostname").value,
+    // … adaugi restul câmpurilor
+  };
+
+  fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.ok) {
+        showModal("✅ Settings saved successfully!", true);
+      } else {
+        showModal("⚠️ Failed to save settings.", false);
+      }
+    })
+    .catch(err => {
+      console.error("❌ Error:", err);
+      showModal("❌ Network error while saving.", false);
+    });
+}
+
+
+        function restartESP() {
+            fetch('/restart', { cache: 'no-store' }).catch(() => { });
+        }
+    </script>
+    <script src="bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

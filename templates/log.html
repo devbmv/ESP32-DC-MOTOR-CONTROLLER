@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 🔍 SEO Meta Tags -->
+<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+<meta name="author" content="devbmv">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- 🔗 Social & Sharing -->
+<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<meta property="og:url" content="https://your-esp32.local/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<title>ESP32 Log</title>
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/style.css">
+
+  <style>
+    body {
+      background: radial-gradient(1200px 600px at 10% -10%, #e3f2fd 0, #fff 60%);
+      min-height: 100vh;
+    }
+
+    .dark-mode {
+      background: #121212;
+      color: #f1f1f1;
+    }
+
+    .nav-glass {
+      backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.6);
+      border-bottom: 1px solid rgba(13, 110, 253, 0.15);
+    }
+
+    .dark-mode .nav-glass {
+      background: rgba(18, 18, 18, 0.6);
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .card {
+      border: 0;
+      border-radius: 1rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+      border: 0;
+      border-top-left-radius: 1rem !important;
+      border-top-right-radius: 1rem !important;
+      font-weight: 600;
+    }
+
+    .hdr-blue {
+      background: linear-gradient(90deg, #0d6efd, #4dabf7);
+      color: #fff;
+    }
+
+    #log {
+      font-family: monospace;
+      background: #111;
+      color: #0f0;
+      padding: 1rem;
+      border-radius: .5rem;
+      height: 60vh;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    #filter {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="navbarContainer"></div>
+
+  <div class="container py-4">
+    <div class="card fade-in">
+
+      <!-- Input pentru comenzi -->
+      <div class="input-group mb-3">
+        <input id="cmdInput" type="text" class="form-control" placeholder="Scrie o comandă (ex: status)">
+        <button class="btn btn-primary" onclick="sendCmd()">Trimite</button>
+      </div>
+
+      <!-- Butoane suplimentare -->
+      <div class="mb-2">
+        <button class="btn btn-info btn-sm" onclick="getSysInfo()">ℹ️ System Info</button>
+        <button class="btn btn-danger btn-sm" onclick="clearLog()">🧹 Clear Log</button>
+        <input id="filter" type="text" class="form-control form-control-sm d-inline-block w-auto"
+          placeholder="Filtru (ex: FAN)" oninput="applyFilter()">
+      </div>
+
+      <div id="cmdOutput" class="mt-2 text-muted small"></div>
+
+      <div class="card-header hdr-blue d-flex justify-content-between align-items-center">
+        <span>ESP32 Live Log</span>
+        <button id="btnDark" class="btn btn-outline-dark btn-sm" onclick="toggleDarkMode()">🌙 Dark</button>
+      </div>
+      <div class="card-body">
+        <pre id="log">Loading log...</pre>
+      </div>
+    </div>
+
+    <div class="text-center mt-3 footer-note">
+      Made with ❤️ for ESP32. Log actualizat automat.
+    </div>
+  </div>
+
+  <script>
+    let fullLog = "";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/navbar', { cache: 'no-store' })
+        .then(r => r.ok ? r.text() : Promise.reject())
+        .then(html => { document.getElementById('navbarContainer').innerHTML = html; })
+        .catch(err => console.error("❌ Navbar error:", err));
+
+      updateLog();
+      setInterval(updateLog, 1000);
+
+      document.getElementById("cmdInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendCmd();
+      });
+    });
+
+
+async function updateLog() {
+  try {
+    const res = await fetch('/log', { cache: 'no-store' });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+
+    const logElem = document.getElementById("log");
+
+    // dacă logul s-a mărit, adaugă doar ce e nou
+    if (text.length > fullLog.length && text.startsWith(fullLog)) {
+      const diff = text.substring(fullLog.length);
+      logElem.textContent += diff;
+    } else {
+      // dacă s-a resetat logul sau e diferit, rescriem complet
+      logElem.textContent = text;
+    }
+
+    fullLog = text;
+
+    // autoscroll doar dacă user-ul era deja jos
+    const nearBottom = logElem.scrollTop + logElem.clientHeight >= logElem.scrollHeight - 20;
+    if (nearBottom) {
+      logElem.scrollTop = logElem.scrollHeight;
+    }
+  } catch (err) {
+    console.error("❌ Error fetching log:", err);
+  }
+}
+
+
+
+    async function sendCmd() {
+      const input = document.getElementById("cmdInput").value;
+      if (!input) return;
+      document.getElementById("cmdInput").value = "";
+
+      try {
+        const res = await fetch("/cmd", { method: "POST", body: input });
+        const text = await res.text();
+        document.getElementById("cmdOutput").textContent = text;
+        updateLog();
+      } catch (err) {
+        console.error("❌ Cmd error:", err);
+      }
+    }
+
+    async function getSysInfo() {
+      try {
+        const res = await fetch("/sysinfo");
+        const txt = await res.text();
+        document.getElementById("cmdOutput").textContent = txt;
+        updateLog();
+      } catch (err) {
+        console.error("❌ SysInfo error:", err);
+      }
+    }
+
+    async function clearLog() {
+      try {
+        const res = await fetch("/clear_log");
+        const txt = await res.text();
+        document.getElementById("cmdOutput").textContent = txt;
+        updateLog();
+      } catch (err) {
+        console.error("❌ ClearLog error:", err);
+      }
+    }
+
+    function applyFilter() {
+      const filter = document.getElementById("filter").value.toLowerCase();
+      const logElem = document.getElementById("log");
+      const lines = fullLog.split("\n");
+
+      const filtered = filter ? lines.filter(l => l.toLowerCase().includes(filter)).join("\n") : fullLog;
+
+      logElem.textContent = filtered;
+      logElem.scrollTop = logElem.scrollHeight;
+    }
+
+    function toggleDarkMode() {
+      const on = !document.body.classList.contains('dark-mode');
+      document.body.classList.toggle('dark-mode', on);
+      localStorage.setItem('dark-mode', on ? '1' : '0');
+      const btn = document.getElementById('btnDark');
+      btn.classList.toggle('btn-outline-light', on);
+      btn.classList.toggle('btn-outline-dark', !on);
+      btn.textContent = on ? '☀️ Light' : '🌙 Dark';
+    }
+
+    (function initDark() {
+      const saved = localStorage.getItem('dark-mode') !== '0';
+      document.body.classList.toggle('dark-mode', saved);
+      const btn = document.getElementById('btnDark');
+      btn.classList.toggle('btn-outline-light', saved);
+      btn.classList.toggle('btn-outline-dark', !saved);
+      btn.textContent = saved ? '☀️ Light' : '🌙 Dark';
+    })();
+  </script>
+
+
+ <script src="/bootstrap.bundle.min.js"></script>
+  <script src="/global.js"></script>   <!-- 🟢 aici -->
+</body>
+</html>

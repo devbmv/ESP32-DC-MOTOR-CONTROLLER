@@ -1,0 +1,200 @@
+body {
+  padding: 30px;
+  background: linear-gradient(to right, #e3f2fd, #fff);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.invisible {
+  display: none
+}
+
+.card {
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(0, 123, 255, 0.3);
+}
+
+.hidden {
+  display: none;
+}
+
+
+
+.progress {
+  border-radius: 9999px;
+  overflow: hidden;
+  background-color: #ddd; /* culoarea pistei */
+}
+
+.progress .progress-bar {           /* nu atingi global bootstrap */
+  border-radius: 9999px;
+}
+
+.progress-bar.app-bar {             /* stilul tău pentru bare */
+  height: 28px;
+  background: linear-gradient(90deg, #00e676, #1de9b6);
+  transition: width 0.4s ease-in-out, background 0.3s ease;
+}
+
+.percent-label {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 600;
+  color: #000;
+  pointer-events: none;
+  user-select: none;
+}
+
+
+
+
+
+.section-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #0d6efd;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #0d6efd;
+  padding-bottom: 0.5rem;
+}
+
+footer {
+  margin-top: 50px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.glow-red {
+  animation: pulse 1.5s infinite;
+  background: red !important;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 5px red;
+  }
+
+  100% {
+    box-shadow: 0 0 20px red;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Mod întunecat global */
+.dark-mode {
+  background-color: #121212 !important;
+  color: #f1f1f1 !important;
+}
+
+/* Navbar întunecat */
+.dark-mode .navbar {
+  background-color: #222 !important;
+}
+
+/* Carduri */
+.dark-mode .card {
+  background-color: #1c1c1c !important;
+  color: white;
+  border-color: #444;
+}
+
+/* Butoane */
+.dark-mode .btn {
+  border-color: #ccc;
+}
+
+/* Alte componente Bootstrap */
+.dark-mode .form-control,
+.dark-mode .form-select {
+  background-color: #222;
+  color: #eee;
+  border: 1px solid #666;
+}
+
+
+
+tr.unset td {
+  background-color: #f0f0f0;
+  color: #888;
+  font-style: italic;
+}
+
+
+#logArea {
+  height: 50vh;
+  overflow-y: auto;
+  resize: vertical;
+  font-family: monospace;
+  background-color: #f9f9f9;
+}
+
+h1 {
+  color: #00e676;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+#status {
+  margin: 20px 0;
+  font-size: 1.2rem;
+  color: #ffeb3b;
+}
+
+.progress-container {
+  width: 80%;
+  max-width: 500px;
+  margin: 0 auto;
+  background: #333;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 255, 100, 0.5);
+}
+
+
+
+
+
+#finalMessage {
+  font-size: 1.5rem;
+  margin-top: 20px;
+  color: #00e676;
+}
+
+.error {
+  color: #ff5252;
+}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 🔍 SEO Meta Tags -->
+<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+<meta name="author" content="devbmv">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- 🔗 Social & Sharing -->
+<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<meta property="og:url" content="https://your-esp32.local/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+
+  <title>About Project • ESP32 Smart Control</title>
+  <link rel="icon" href="https://www.svgrepo.com/show/530433/temperature.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <style>
+    /* === GLOBAL LAYOUT === */
+    body {
+      background-color: #0b1220;
+      color: #e6eef7;
+      font-family: "Segoe UI", Roboto, Ubuntu, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      flex: 1;
+      max-width: 900px;
+      padding: 30px 20px;
+    }
+
+    h2 {
+      color: #4dabf7;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #c8d4e4;
+    }
+
+    .highlight {
+      color: #20c997;
+      font-weight: 600;
+    }
+
+    /* === FOOTER === */
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #9fb3c8;
+      padding: 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      margin-top: 30px;
+    }
+
+    /* === DONATION CARD === */
+    .donate-card {
+      background: #111a2b;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 30px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    .donate-card h3 {
+      color: #4dabf7;
+      margin-bottom: 10px;
+    }
+
+    .donate-card p {
+      font-size: 15px;
+      color: #b5c8e1;
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 6px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    .btn-revolut {
+      background: #0075f6;
+      color: #fff;
+    }
+
+    .btn-revolut:hover {
+      background: #005ed1;
+    }
+
+    .btn-paypal {
+      background: #ffc439;
+      color: #000;
+    }
+
+    .btn-paypal:hover {
+      background: #e5b100;
+      color: #000;
+    }
+
+    /* === TECHNICAL INFO BOX === */
+    .tech-info {
+      background: #101a2c;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 30px;
+    }
+
+    .tech-info h4 {
+      color: #4dabf7;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .tech-info ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .tech-info li {
+      padding: 4px 0;
+      font-size: 15px;
+      color: #bcd1ec;
+    }
+
+    /* === ANIMATIONS === */
+    .fade-in {
+      animation: fade 0.7s ease-in-out;
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body class="fade-in">
+
+  <!-- Navbar dynamically loaded -->
+  <div id="navbar"></div>
+  <script>
+    fetch('/navbar')
+      .then(res => res.text())
+      .then(html => { document.getElementById("navbar").innerHTML = html; });
+  </script>
+
+  <!-- === ABOUT SECTION === -->
+  <div class="container">
+    <h2>About the Project</h2>
+    <p>
+      <span class="highlight">ESP32 Smart Control</span> is an open-source project focused on intelligent
+      temperature and fan management for both automotive and industrial applications.
+      It features a modern web interface, real-time monitoring, OTA updates,
+      and both manual and automatic fan control.
+    </p>
+
+    <!-- === TECHNICAL FEATURES === -->
+    <div class="tech-info">
+      <h4>🔧 Technical Specifications</h4>
+      <ul>
+        <li>🧠 Dual-core ESP32 microcontroller with integrated Wi-Fi</li>
+        <li>🌡️ Temperature sensing for system and engine modules</li>
+        <li>⚙️ Variable PWM fan speed control</li>
+        <li>📶 Modern Web Interface (HTML5 + JSON API)</li>
+        <li>🗂️ OTA updates for both Firmware and LittleFS</li>
+        <li>🧩 Configurable local storage via internal filesystem</li>
+        <li>💾 Optional integration with Django / Raspberry Pi servers</li>
+      </ul>
+    </div>
+
+    <!-- === DONATION SECTION === -->
+    <div class="donate-card">
+      <h3>💖 Support Project Development</h3>
+      <p>If you appreciate the work put into this project, consider a small donation
+        to help fund new features and improvements.</p>
+      <div>
+        <a href="https://revolut.me/maik775" target="_blank" class="btn btn-revolut">💸 Donate via Revolut</a>
+        <a href="https://www.paypal.me/devbmv" target="_blank" class="btn btn-paypal">☕ Support via PayPal</a>
+      </div>
+      <p class="mt-2" style="font-size: 13px; color: #9fb3c8;">
+        Thank you for your support — every contribution makes a difference! 🙏
+      </p>
+    </div>
+  </div>
+
+  <audio id="alert-audio" src="alert.mp3" preload="auto"></audio>
+
+  <!-- === FOOTER === -->
+  <footer>
+    © 2025 ESP32 Smart Control UI — Built with ❤️ by <strong>devbmv (Mihail Barbascumpa)</strong>
+  </footer>
+
+  <script src="bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

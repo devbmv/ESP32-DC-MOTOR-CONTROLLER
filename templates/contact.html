@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- 🔍 SEO Meta Tags -->
+<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+<meta name="author" content="devbmv">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- 🔗 Social & Sharing -->
+<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<meta property="og:url" content="https://your-esp32.local/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+
+  <title>ESP32 Smart Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="https://www.svgrepo.com/show/530433/temperature.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/style.css">
+
+  <style>
+    /* === Global Styles === */
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #f8f9fa, #dfe9f3);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      animation: fadeIn 0.7s ease;
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* === Navbar === */
+    nav.navbar {
+      background: #0d6efd;
+    }
+
+    /* === Hero Section === */
+    .hero {
+      text-align: center;
+      padding: 70px 20px;
+      color: #212529;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    /* === Donation Section === */
+    .donation-card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 25px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .donation-card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* === Footer === */
+    footer {
+      margin-top: auto;
+      text-align: center;
+      background: #0d6efd;
+      color: white;
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+
+    /* === Buttons === */
+    .btn-revolut {
+      background: #0075f6;
+      color: white;
+    }
+
+    .btn-revolut:hover {
+      background: #005ed1;
+      color: white;
+    }
+
+    .btn-paypal {
+      background: #ffc107;
+      color: #000;
+    }
+
+    .btn-paypal:hover {
+      background: #e0a800;
+      color: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 🔹 Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark shadow">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <img src="https://www.svgrepo.com/show/530433/temperature.svg" width="30" height="30" class="me-2">
+        ESP32 Control
+      </a>
+
+      <!-- Mobile navbar toggle -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Navbar links -->
+      <div id="navbarNav" class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="/settings">Settings</a></li>
+          <li class="nav-item"><a class="nav-link" href="/log_page">Logs</a></li>
+          <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 🔹 Hero Section -->
+  <section class="hero">
+    <h1>Smart Control for ESP32</h1>
+    <p>Monitor your temperature, system, and fan behavior in real-time directly from your browser.</p>
+    <a href="/dashboard" class="btn btn-primary btn-lg mt-3">Open Dashboard</a>
+  </section>
+
+  <!-- 🔹 Donation Section -->
+  <div class="container my-5">
+    <div class="donation-card">
+      <h4 class="mb-3 text-primary">Support This Project 💙</h4>
+      <p>This project is open-source. You can help its development with a small donation:</p>
+
+      <div class="d-flex justify-content-center gap-3 mt-3 flex-wrap">
+        <a href="https://revolut.me/maik775" target="_blank" class="btn btn-revolut btn-lg">
+          💸 Donate via Revolut
+        </a>
+        <a href="https://www.paypal.me/devbmv" target="_blank" class="btn btn-paypal btn-lg">
+          ☕ Support on PayPal
+        </a>
+      </div>
+
+      <small class="text-muted d-block mt-3">
+        Thank you for your support — every contribution matters!
+      </small>
+    </div>
+  </div>
+
+  <!-- 🔹 Contact Section -->
+  <div class="container my-5">
+    <h3 class="text-center text-primary mb-4">Contact</h3>
+    <p class="text-center">
+      For inquiries, email us at:
+      <a href="mailto:maik775@yahoo.ro">maik775@yahoo.ro</a>
+    </p>
+  </div>
+
+  <!-- Audio Alert -->
+  <audio id="alert-sound" src="alert.mp3" preload="auto"></audio>
+
+  <!-- 🔹 Footer -->
+  <footer>
+    © 2025 ESP32 Smart Control | Created with ❤️ by <strong>devbmv</strong>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // --- Button hover pulse animation ---
+    document.querySelectorAll(".btn").forEach(btn => {
+      btn.addEventListener("mouseenter", () => btn.style.transform = "scale(1.05)");
+      btn.addEventListener("mouseleave", () => btn.style.transform = "scale(1)");
+    });
+  </script>
+</body>
+</html>

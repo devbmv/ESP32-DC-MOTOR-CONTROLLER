@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>📡 Informații WiFi</title>
+  <!-- 🔍 SEO Meta Tags -->
+<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+<meta name="author" content="devbmv">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- 🔗 Social & Sharing -->
+<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<meta property="og:url" content="https://your-esp32.local/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <script src="/bootstrap.bundle.min.js"></script>
+</head>
+<body class="fade-in">
+
+  <div id="navbar"></div>
+  <script>
+    fetch('/navbar')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
+      });
+  </script>
+
+  <h3>📡 Informații conexiune WiFi</h3>
+  <div id="currentWiFi" class="mb-4"></div>
+  <h4>🔍 Rețele disponibile</h4>
+  <ul id="wifiList" class="list-group"></ul>
+
+  <script>
+    fetch('/wifi_info')
+      .then(res => res.json())
+      .then(data => {
+        // Conexiune curentă
+        const c = data.current;
+        document.getElementById("currentWiFi").innerHTML = `
+          <p><b>SSID:</b> ${c.connected_ssid}</p>
+          <p><b>IP:</b> ${c.ip}</p>
+          <p><b>MAC ESP:</b> ${c.mac}</p>
+          <p><b>BSSID:</b> ${c.bssid}</p>
+          <p><b>RSSI:</b> ${c.rssi} dBm</p>
+          <p><b>Gateway:</b> ${c.gateway}</p>
+          <p><b>DNS:</b> ${c.dns}</p>
+          <p><b>Subnet:</b> ${c.subnet}</p>
+          <p><b>Status conexiune:</b> ${c.status}</p>
+        `;
+
+        // Rețele disponibile
+        const list = document.getElementById("wifiList");
+        data.available.forEach(net => {
+          const item = document.createElement("li");
+          item.className = "list-group-item";
+          item.innerHTML = `
+            <strong>${net.ssid || "(fără nume)"}</strong><br>
+            RSSI: ${net.rssi} dBm | Canal: ${net.channel} | BSSID: ${net.bssid}<br>
+            ${net.encryption == 0 ? "Fără parolă" : "Protejat"} ${net.hidden ? "(Ascuns)" : ""}
+          `;
+          list.appendChild(item);
+        });
+      })
+      .catch(err => {
+        document.body.innerHTML += `<div class="text-danger">❌ Eroare: ${err}</div>`;
+      });
+  </script>
+</body>
+</html>

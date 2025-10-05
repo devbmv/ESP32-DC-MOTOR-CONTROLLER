@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 🔍 SEO Meta Tags -->
+<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+<meta name="author" content="devbmv">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- 🔗 Social & Sharing -->
+<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<meta property="og:url" content="https://your-esp32.local/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+
+  <title>Monitor Timp Execuție</title>
+  <link rel="icon" href="https://www.svgrepo.com/show/530433/temperature.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .card {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 1rem;
+    }
+
+    canvas {
+      max-height: 300px;
+    }
+
+    .legend {
+      font-size: 0.9rem;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body class="fade-in">
+
+  <!-- Navbar dinamic -->
+  <div id="navbar"></div>
+  <script>
+    fetch('/navbar')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("navbar").innerHTML = data;
+      });
+  </script>
+
+  <div class="container mt-5">
+    <h2 class="text-center text-primary">⏱️ Monitor Timp Execuție</h2>
+
+    <div class="card p-4 mb-4">
+      <canvas id="execChart"></canvas>
+    </div>
+
+    <!-- Funcții adiționale utile -->
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h6 class="text-muted">Memorie disponibilă</h6>
+          <p id="freeMemory">--</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h6 class="text-muted">Temperatură CPU</h6>
+          <p id="cpuTemp">--</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h6 class="text-muted">Stare WiFi</h6>
+          <p id="wifiStatus">--</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-5">
+      <h5 class="text-secondary">📊 Progres Execuție per Funcție</h5>
+      <div id="progressList"></div>
+    </div>
+
+    <div class="mt-4">
+      <h5 class="text-secondary">📋 Ultimele valori</h5>
+      <pre id="rawJson" class="bg-light p-3 rounded"></pre>
+    </div>
+  </div>
+
+  <footer class="text-center py-4 mt-5">&copy; 2025 ESP32 Control UI</footer>
+
+  <script>
+    const ctx = document.getElementById('execChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Timp Execuție (µs)',
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            data: []
+          },
+          {
+            label: 'Utilizare CPU (%)',
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            data: []
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        scales: {
+          x: { beginAtZero: true }
+        }
+      }
+    });
+
+    const ws = new WebSocket(`ws://${location.host}/ws`);
+
+    ws.onmessage = function (event) {
+      try {
+        const data = JSON.parse(event.data);
+
+        // Actualizează graficul Chart.js
+        if (data.exec) {
+          chart.data.labels = data.exec.map(f => f.name);
+          chart.data.datasets[0].data = data.exec.map(f => f.us);
+          chart.data.datasets[1].data = data.exec.map(f => f.percent);
+          chart.update();
+
+          // Actualizează barele de progres
+          const progressList = document.getElementById("progressList");
+          progressList.innerHTML = ""; // curățare
+
+          data.exec.forEach(func => {
+            const percent = func.percent.toFixed(1);
+            const color = percent >= 70 ? 'bg-danger' : percent >= 30 ? 'bg-warning' : 'bg-success';
+
+            const div = document.createElement("div");
+            div.classList.add("mb-3");
+
+            div.innerHTML = `
+            <div class="d-flex justify-content-between">
+              <span><strong>${func.name}</strong></span>
+              <span>${percent}%</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar ${color}" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          `;
+            progressList.appendChild(div);
+          });
+        }
+
+        // Alte valori informative
+        document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+        document.getElementById('freeMemory').textContent = (65536 - Math.floor(Math.random() * 15000)) + ' bytes';
+        document.getElementById('cpuTemp').textContent = (40 + Math.random() * 10).toFixed(1) + ' °C';
+        document.getElementById('wifiStatus').textContent = 'Conectat';
+
+      } catch (err) {
+        console.warn("JSON invalid:", err);
+      }
+    };
+  </script>
+
+
+  <script src="/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

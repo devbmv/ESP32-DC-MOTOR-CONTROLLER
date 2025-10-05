@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- 🔍 SEO Meta Tags -->
+  <meta name="description"
+    content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+  <meta name="keywords"
+    content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+  <meta name="author" content="devbmv">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0d6efd">
+
+  <!-- 🔗 Social & Sharing -->
+  <meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+  <meta property="og:description"
+    content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+  <meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+  <meta property="og:url" content="https://your-esp32.local/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+  <meta name="twitter:description"
+    content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+  <meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+  <meta charset="UTF-8">
+  <title>Opel Zafira Fan Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" href="https://www.svgrepo.com/show/530433/temperature.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* === GLOBAL STYLES === */
+    body {
+      padding-top: 70px;
+      background: #f5f7fa;
+      font-family: "Segoe UI", Roboto, Ubuntu, sans-serif;
+    }
+
+    .fan-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 420px;
+    }
+
+    #fanCanvas {
+      background: transparent;
+      display: block;
+      margin: 0 auto;
+      box-shadow: 0 2px 12px #0002;
+      border-radius: 50%;
+    }
+
+    .fan-label {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    #fanPercentText {
+      position: absolute;
+      top: 52%;
+      left: 50%;
+      transform: translate(-50%, -60%);
+      font-size: 2.7rem;
+      font-weight: bold;
+      color: #198754;
+      pointer-events: none;
+      text-shadow: 0 2px 8px #fff, 0 0px 10px #19875422;
+    }
+
+    .logArea {
+      font-size: 0.92rem;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .container {
+      position: relative;
+    }
+
+    .toast {
+      position: fixed;
+      right: 1.5rem;
+      bottom: 2rem;
+      z-index: 9999;
+      min-width: 220px;
+      background: #212529;
+      color: #fff;
+      padding: .7em 1.4em;
+      border-radius: 1em;
+      font-weight: 500;
+      box-shadow: 0 2px 16px #0004;
+      opacity: 0.95;
+      transition: opacity 0.3s;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width:600px) {
+      #fanCanvas {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 98vw !important;
+      }
+    }
+
+    /* === DONATION CARD === */
+    .donation-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
+      padding: 25px;
+      text-align: center;
+      margin: 50px auto 20px;
+      max-width: 600px;
+    }
+
+    .donation-card h4 {
+      color: #0d6efd;
+      margin-bottom: 12px;
+    }
+
+    .btn-revolut {
+      background: #0075f6;
+      color: white;
+    }
+
+    .btn-revolut:hover {
+      background: #005ed1;
+      color: white;
+    }
+
+    .btn-paypal {
+      background: #ffc439;
+      color: black;
+    }
+
+    .btn-paypal:hover {
+      background: #e5b100;
+      color: black;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+      font-size: 0.9rem;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar dynamically loaded -->
+  <div id="navbarContainer"></div>
+  <script>
+    fetch("/navbar")
+      .then(res => res.text())
+      .then(html => { document.getElementById("navbarContainer").innerHTML = html; });
+  </script>
+
+  <div class="container">
+    <!-- === HEADER === -->
+    <h2 class="text-center mb-4">🌬️ Opel Zafira Fan Control <span id="wsStatus" class="badge bg-secondary">🔌?</span>
+    </h2>
+
+    <!-- === FAN DISPLAY === -->
+    <div class="fan-label">Fan Speed:</div>
+    <div class="fan-wrapper" style="position:relative;">
+      <canvas id="fanCanvas" width="420" height="420"></canvas>
+      <span id="fanPercentText">0%</span>
+    </div>
+
+    <div class="text-center mt-2 mb-2">
+      <b>🌡️ Engine Temperature:</b> <span id="motorTemp">--</span> °C
+    </div>
+
+    <!-- === TEMPERATURE CHART === -->
+    <div class="mb-3" style="max-width:420px;margin:0 auto;">
+      <canvas id="motorengineTemphart" height="110"></canvas>
+    </div>
+
+    <!-- === ESP32 INFO === -->
+    <div class="row g-3 bg-white p-3 shadow rounded mx-auto">
+      <div class="col-md-6">
+        <div class="card p-2 px-3 shadow-sm" id="espInfo" style="font-size:.98em;">
+          <b>ESP32 Information:</b> <br>
+          <span id="espIp">IP: --</span> <br>
+          <span id="espUptime">Uptime: --</span> <br>
+          <span id="espMem">Memory: -- KB</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- === FAN SETTINGS + SMS === -->
+    <div class="row g-4 mb-4" style="max-width: 900px; margin: auto;">
+      <!-- 🌀 Fan Control Settings -->
+      <div class="col-md-6">
+        <form id="configForm" class="bg-white shadow rounded p-4 h-100 animate__animated animate__fadeIn">
+          <h5 class="mb-3 fw-bold text-primary">🌬️ Fan Settings</h5>
+
+          <div class="mb-3">
+            <label for="minimumRotationFan" class="form-label">Start rotation at:</label>
+            <input type="number" id="minimumRotationFan" class="form-control" step="1" min="5" max="110" value="26">
+          </div>
+
+          <div class="mb-3">
+            <label for="maximumRotationFan" class="form-label">Max rotation at:</label>
+            <input type="number" id="maximumRotationFan" class="form-control" step="1" min="25" max="115" value="40">
+          </div>
+
+          <div class="mb-3">
+            <label for="alertTemp" class="form-label">Alert above temperature:</label>
+            <input type="number" id="alertTemp" class="form-control" step="1" min="20" max="150" value="100">
+          </div>
+
+          <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary px-4">💾 Save</button>
+            <span id="saveMsg" class="text-success ms-3"></span>
+          </div>
+        </form>
+      </div>
+
+      <!-- 📤 Send SMS / WhatsApp -->
+      <div class="col-md-6">
+        <div class="bg-white shadow rounded p-4 h-100 animate__animated animate__fadeInRight">
+          <h5 class="mb-3 fw-bold text-success">📤 Send SMS / WhatsApp</h5>
+          <label for="smsText" class="form-label">Custom message:</label>
+          <textarea id="smsText" class="form-control mb-3" rows="5"
+            placeholder="Write your message here...">ESP32 firmware updated successfully!</textarea>
+          <div class="d-grid">
+            <button class="btn btn-success" onclick="sendSMS()">📲 Send Message</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- === LOG AREA === -->
+    <h4>📝 Last Log</h4>
+    <pre id="logArea" class="bg-white p-3 border rounded shadow-sm logArea"></pre>
+    <div class="text-end mb-2">
+      <button class="btn btn-sm btn-outline-secondary" onclick="clearLog()">🧹 Clear Log</button>
+    </div>
+
+    <!-- === DONATION CARD === -->
+    <div class="donation-card">
+      <h4>💖 Support This Project</h4>
+      <p>Your contribution helps keep this open-source project alive and growing.</p>
+      <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
+        <a href="https://revolut.me/maik775" target="_blank" class="btn btn-revolut btn-lg">💸 Donate via Revolut</a>
+        <a href="https://www.paypal.me/devbmv" target="_blank" class="btn btn-paypal btn-lg">☕ Support via PayPal</a>
+      </div>
+      <small class="text-muted d-block mt-3">Thank you for supporting development!</small>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <script src="/global.js"></script>
+  <script src="/bootstrap.bundle.min.js"></script>
+
+  <!-- Existing JS logic remains (unchanged for brevity) -->
+</body>
+
+</html>

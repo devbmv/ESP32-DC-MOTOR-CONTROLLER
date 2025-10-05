@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://github.com/devbmv/esp32-dc-motor-controller/sitemap.xml

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- 🌐 Meta & Imports -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 🔍 SEO Meta Tags -->
+<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+<meta name="author" content="devbmv">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- 🔗 Social & Sharing -->
+<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+<meta property="og:url" content="https://your-esp32.local/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+
+  <title>ESP32 OTA & LittleFS Updater</title>
+
+  <!-- 🧩 CSS dependencies -->
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/style.css">
+
+  <!-- 🌡️ Icon -->
+  <link rel="icon" href="https://www.svgrepo.com/show/530433/temperature.svg" type="image/svg+xml">
+
+  <style>
+    body {
+      background-color: #0b1220;
+      color: #e6eef7;
+      font-family: "Segoe UI", Roboto, Ubuntu, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      flex: 1;
+      max-width: 950px;
+      margin-top: 40px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: #111a2b;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      color: #d6e3f1;
+    }
+
+    h2, h5 {
+      color: #4dabf7;
+      font-weight: 600;
+    }
+
+    hr {
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .progress-container {
+      margin-top: 10px;
+    }
+
+    .progress {
+      background: #222c42;
+      border-radius: 10px;
+    }
+
+    .progress-bar {
+      background: #20c997;
+      font-weight: 600;
+    }
+
+    /* 🌟 Donation Section */
+    .donate-card {
+      background: #101a2c;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: center;
+      padding: 25px;
+      margin: 40px auto;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      color: #cfe6ff;
+    }
+
+    .donate-card h3 {
+      color: #4dabf7;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .btn-revolut {
+      background: #0075f6;
+      color: #fff;
+    }
+
+    .btn-revolut:hover {
+      background: #005ed1;
+      color: #fff;
+    }
+
+    .btn-paypal {
+      background: #ffc439;
+      color: #000;
+    }
+
+    .btn-paypal:hover {
+      background: #e5b100;
+      color: #000;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 13px;
+      color: #9fb3c8;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 30px;
+    }
+  </style>
+
+  <!-- Bootstrap JS -->
+  <script src="/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+  <!-- 🧭 Navbar loader -->
+  <div id="navbarContainer"></div>
+  <script>
+    // Dynamically load navbar (only if /navbar exists)
+    fetch('/navbar', { cache: 'no-store' })
+      .then(res => res.text())
+      .then(html => document.getElementById("navbarContainer").innerHTML = html)
+      .catch(err => console.error("Navbar load error:", err));
+  </script>
+
+  <!-- ⚙️ MAIN CONTAINER -->
+  <div class="container">
+    <h2 class="mb-4 text-center">ESP32 OTA & LittleFS Updater</h2>
+
+    <!-- 🔧 OTA Firmware Update -->
+    <div class="card p-4 mb-4">
+      <h5>📦 Upload Firmware (OTA)</h5>
+      <p class="text-muted small">Select a compiled <code>.bin</code> firmware file and upload it to your ESP32.</p>
+      <input type="file" id="firmware" class="form-control mb-3" title="Select firmware file">
+      <button onclick="uploadFirmware()" class="btn btn-primary">📤 Upload Firmware</button>
+      <div id="fwStatus" class="mt-3 text-success"></div>
+
+      <div class="progress-container">
+        <div class="progress">
+          <div class="progress-bar" id="fwProgressBar" style="width: 0%">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- 💾 LittleFS Update -->
+    <div class="card p-4 mb-4">
+      <h5>🗂️ Upload File System (LittleFS)</h5>
+      <p class="text-muted small">Upload a LittleFS image to replace the web interface or configuration files.</p>
+      <input type="file" id="LittleFS" class="form-control mb-3" title="Select LittleFS image">
+      <button onclick="uploadFS()" class="btn btn-secondary">📤 Upload FS Image</button>
+      <div id="fsStatus" class="mt-3 text-success"></div>
+
+      <div class="progress-container">
+        <div class="progress">
+          <div class="progress-bar bg-secondary" id="fsProgressBar" style="width: 0%">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- 📂 File Manager -->
+    <div class="card p-4 mb-4">
+      <h5>📁 LittleFS File Manager</h5>
+      <button onclick="loadfiles_list()" class="btn btn-outline-info btn-sm mb-3">🔄 Refresh List</button>
+      <ul id="files_list" class="file-list list-group mb-3"></ul>
+      <div id="fileContent"></div>
+    </div>
+
+    <hr>
+
+    <!-- 🧠 System Info -->
+    <div class="card p-4 mb-4">
+      <h5>📊 System Information</h5>
+      <button onclick="showMemory()" class="btn btn-info btn-sm mb-3">📈 Show Memory Usage</button>
+      <div id="meminfoTable"></div>
+    </div>
+
+    <hr>
+
+    <!-- 🧹 Format LittleFS -->
+    <div class="card p-4 mb-4">
+      <h5>🧹 Format LittleFS</h5>
+      <p class="text-warning small">Warning: this will erase all files from the ESP32 storage!</p>
+      <button onclick="formatFS()" class="btn btn-danger">🗑️ Format LittleFS</button>
+      <div id="fsFormatStatus" class="mt-3 text-danger"></div>
+    </div>
+
+    <!-- 💖 Donation Section -->
+    <div class="donate-card">
+      <h3>💖 Support This Project</h3>
+      <p>If you find this tool useful, consider supporting its development with a small donation:</p>
+      <div class="mt-3">
+        <a href="https://revolut.me/maik775" target="_blank" class="btn btn-revolut">💸 Donate via Revolut</a>
+        <a href="https://www.paypal.me/devbmv" target="_blank" class="btn btn-paypal">☕ Support on PayPal</a>
+      </div>
+      <p class="mt-2 small text-muted">Every contribution helps to improve ESP32 projects. Thank you! 🙏</p>
+    </div>
+  </div>
+
+  <!-- 🔚 Footer -->
+  <footer>© 2025 ESP32 Control Dashboard — Created by devbmv (Mihail Barbascumpa)</footer>
+
+  <script>
+/* ============================================================
+   🧠 Helper: Human-readable size formatter
+   Converts bytes to KB / MB for nicer table display.
+============================================================ */
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 B';
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const val = bytes / Math.pow(1024, i);
+  return `${val.toFixed(2)} ${sizes[i]}`;
+}
+
+/* ============================================================
+   📊 OTA Firmware Upload Progress Polling
+============================================================ */
+let pollingInterval = null;
+
+function pollOTAProgress() {
+  pollingInterval = setInterval(() => {
+    fetch('/ota_status')
+      .then(res => res.json())
+      .then(data => {
+        const percent = Math.min(data.progress, 100).toFixed(1);
+        const bar = document.getElementById('fwProgressBar');
+        bar.style.width = percent + '%';
+        bar.innerText = percent + '%';
+
+        if (percent >= 100) clearInterval(pollingInterval);
+      })
+      .catch(err => console.error('Error checking OTA progress:', err));
+  }, 500);
+}
+
+/* ============================================================
+   💾 LittleFS Upload Progress Polling
+============================================================ */
+function pollFSProgress() {
+  const bar = document.getElementById('fsProgressBar');
+  const interval = setInterval(() => {
+    fetch('/fs_status')
+      .then(res => res.json())
+      .then(data => {
+        const percent = Math.min(data.progress, 100).toFixed(1);
+        bar.style.width = percent + '%';
+        bar.innerText = percent + '%';
+        if (percent >= 100) clearInterval(interval);
+      })
+      .catch(err => {
+        console.error('Error checking FS progress:', err);
+        clearInterval(interval);
+      });
+  }, 500);
+}
+
+/* ============================================================
+   🚀 Upload Firmware (OTA)
+============================================================ */
+function uploadFirmware() {
+  const file = document.getElementById('firmware').files[0];
+  const status = document.getElementById('fwStatus');
+  const bar = document.getElementById('fwProgressBar');
+
+  if (!file) {
+    status.innerText = "⚠️ No file selected!";
+    status.className = "text-danger";
+    return;
+  }
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/firmware_update', true);
+
+  // Track progress visually
+  xhr.upload.onprogress = function (e) {
+    if (e.lengthComputable) {
+      const percent = Math.round((e.loaded / e.total) * 100);
+      bar.style.width = percent + '%';
+      bar.innerText = percent + '%';
+    }
+  };
+
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      showModal("✅ Firmware successfully updated!", true);
+    } else {
+      showModal("❌ Firmware update failed: " + xhr.responseText, false);
+    }
+  };
+
+  const formData = new FormData();
+  formData.append('firmware.bin', file);
+  pollOTAProgress();
+  xhr.send(formData);
+}
+
+/* ============================================================
+   🗂️ Upload LittleFS File System Image
+============================================================ */
+function uploadFS() {
+  const file = document.getElementById('LittleFS').files[0];
+  const status = document.getElementById('fsStatus');
+  if (!file) {
+    status.innerText = "⚠️ No file selected!";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('LittleFS', file);
+
+  fetch('/updatefs', { method: 'POST', body: formData })
+    .then(res => res.text().then(text => ({ status: res.status, text })))
+    .then(({ status, text }) => {
+      if (status === 200) showModal("✅ FS updated successfully!", true);
+      else showModal("⚠️ FS update failed: " + text, false);
+    })
+    .catch(err => showModal("❌ Upload error: " + err, false));
+
+  pollFSProgress();
+}
+
+/* ============================================================
+   🗑️ Format LittleFS
+============================================================ */
+function formatFS() {
+  if (!confirm("⚠️ All files will be deleted. Continue?")) return;
+
+  fetch('format_fs', { method: 'POST' })
+    .then(res => res.text().then(text => ({ status: res.status, text })))
+    .then(({ status, text }) => {
+      if (status === 200) showModal("✅ FS formatted: " + text, true);
+      else showModal("❌ FS format failed: " + text, false);
+      loadfiles_list();
+    })
+    .catch(err => showModal("❌ Network error: " + err, false));
+}
+
+/* ============================================================
+   📜 File List + View + Delete
+============================================================ */
+function loadfiles_list() {
+  fetch('/files_list')
+    .then(res => res.json())
+    .then(files => {
+      const list = document.getElementById('files_list');
+      list.innerHTML = '';
+      files.forEach(name => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+        const span = document.createElement('span');
+        span.innerText = name;
+        li.appendChild(span);
+
+        // Buttons group
+        const btnGroup = document.createElement('div');
+
+        const btnView = document.createElement('button');
+        btnView.className = 'btn btn-sm btn-outline-secondary me-2';
+        btnView.innerText = '📖 View';
+        btnView.onclick = () => viewFile(name);
+        btnGroup.appendChild(btnView);
+
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'btn btn-sm btn-outline-danger';
+        btnDelete.innerText = '🗑️ Delete';
+        btnDelete.onclick = () => deleteFile(name);
+        btnGroup.appendChild(btnDelete);
+
+        li.appendChild(btnGroup);
+        list.appendChild(li);
+      });
+    });
+}
+
+/* View file content in page */
+function viewFile(filename) {
+  fetch('/readFile?name=' + encodeURIComponent(filename))
+    .then(res => res.text())
+    .then(content => {
+      document.getElementById('fileContent').innerHTML =
+        `<h6>File content: <code>${filename}</code></h6><pre>${content}</pre>`;
+    });
+}
+
+/* Delete file */
+function deleteFile(filename) {
+  if (!confirm(`Delete file ${filename}?`)) return;
+  const path = filename.startsWith("/") ? filename : "/" + filename;
+
+  fetch('/deleteFile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'name=' + encodeURIComponent(path)
+  })
+    .then(res => res.text())
+    .then(msg => {
+      showModal(msg, true);
+      loadfiles_list();
+    })
+    .catch(err => showModal("❌ Error deleting file: " + err, false));
+}
+
+/* ============================================================
+   🧠 Show Memory / Partition Info
+============================================================ */
+function showMemory() {
+  fetch('/meminfo')
+    .then(res => res.json())
+    .then(info => {
+      const partEntries = info.partitionTable ? Object.entries(info.partitionTable) : [];
+
+      const html = `
+        <table class="table table-bordered table-striped table-sm">
+          <thead class="table-light">
+            <tr><th>Memory</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Free RAM</td><td>${formatBytes(info.heap)}</td></tr>
+            <tr><td>Total RAM</td><td>${formatBytes(info.heapTotal || 0)}</td></tr>
+            <tr><td>Min RAM Reached</td><td>${formatBytes(info.heapMin || 0)}</td></tr>
+            <tr><td>Free PSRAM</td><td>${formatBytes(info.psram || 0)}</td></tr>
+            <tr><td>Total PSRAM</td><td>${formatBytes(info.psramTotal || 0)}</td></tr>
+            <tr><td>Flash Total</td><td>${formatBytes(info.flashSize || 0)}</td></tr>
+            <tr><td>Flash Speed</td><td>${info.flashSpeed || 'N/A'} Hz</td></tr>
+            <tr><td>Flash Mode</td><td>${info.flashMode || 'N/A'}</td></tr>
+            <tr><td>Sketch Used</td><td>${formatBytes(info.sketchSize || 0)}</td></tr>
+            <tr><td>Sketch Free</td><td>${formatBytes(info.sketchFree || 0)}</td></tr>
+            <tr><td>LittleFS Total</td><td>${formatBytes(info.LittleFSTotal || 0)}</td></tr>
+            <tr><td>LittleFS Used</td><td>${formatBytes(info.LittleFSUsed || 0)}</td></tr>
+            <tr><td>LittleFS Free</td><td>${formatBytes(info.LittleFSFree || 0)}</td></tr>
+            <tr><td>CPU Temp</td><td>${(info.cpuTemp || 0).toFixed(1)} °C</td></tr>
+            <tr><td>CPU Freq</td><td>${info.cpuFreq || 'N/A'} MHz</td></tr>
+            <tr><td>Core</td><td>${info.core || 'N/A'}</td></tr>
+            <tr><td>SDK Version</td><td>${info.sdkVersion || 'N/A'}</td></tr>
+            <tr><td>Chip Revision</td><td>${info.chipRevision || 'unknown'}</td></tr>
+          </tbody>
+        </table>
+
+        <h6 class="mt-4">📂 Partitions:</h6>
+        <table class="table table-bordered table-striped table-sm">
+          <thead class="table-light"><tr><th>Label</th><th>Address</th><th>Size</th></tr></thead>
+          <tbody>
+            ${partEntries.length > 0
+              ? partEntries.map(([label, part]) => `
+                <tr>
+                  <td>${label}</td>
+                  <td>${part.address}</td>
+                  <td>${formatBytes(part.size)}</td>
+                </tr>`).join('')
+              : `<tr><td colspan="3" class="text-muted">No partitions available</td></tr>`
+            }
+          </tbody>
+        </table>`;
+
+      document.getElementById('meminfoTable').innerHTML = html;
+    })
+    .catch(err => {
+      document.getElementById('meminfoTable').innerHTML =
+        `<div class="text-danger">Error: ${err}</div>`;
+    });
+}
+
+/* ============================================================
+   🧩 File input listener to show selected name
+============================================================ */
+document.getElementById('firmware').addEventListener('change', function () {
+  const file = this.files[0];
+  const status = document.getElementById('fwStatus');
+  if (file) {
+    status.innerText = `📁 Selected: ${file.name} (${file.size} bytes)`;
+    status.className = 'text-success';
+  } else {
+    status.innerText = '';
+  }
+});
+
+/* Auto-load file list when the page opens */
+window.onload = loadfiles_list;
+</script>
+
+  <script src="/global.js"></script>
+</body>
+
+</html>
