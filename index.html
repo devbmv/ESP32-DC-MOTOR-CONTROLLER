@@ -4,15 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ESP32 DC Motor Controller – Demo</title>
-
-<!-- SEO -->
-<meta name="description" content="Demo web interface for the ESP32-S3 DC Motor Controller – Open-source project by devbmv.">
-<meta name="keywords" content="ESP32, DC motor controller, IoT, ESP32S3, fan control, PWM, CAN, devbmv, GitHub Pages demo">
+<title>ESP32-S3 DC Motor Controller – Demo</title>
+<meta name="description" content="Demo version of the ESP32-S3 Smart DC Motor Controller – Fully simulated without ESP hardware.">
+<meta name="keywords" content="ESP32, DC motor controller, demo, PWM, fan, temperature, automotive, web dashboard">
 <meta name="author" content="devbmv">
 <meta name="robots" content="index, follow">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
 body {
   background: radial-gradient(1200px 600px at 10% -10%, #e3f2fd 0, #fff 60%);
@@ -31,35 +30,46 @@ body {
 .hdr-amber{ background:linear-gradient(90deg,#f59f00,#ffd43b);color:#2b2b2b;}
 .kpi{font-size:2.2rem;font-weight:700;}
 .progress{height:28px;}
-.dark-mode{background:#111;color:#eee;}
+.percent-label { font-weight:700; }
+.footer-note { color:#6c757d;font-size:.9rem; }
 </style>
 </head>
+
 <body>
 <div class="container py-4">
 
-  <h1 class="text-center mb-4 fw-bold">ESP32-S3 DC Motor Controller (Demo)</h1>
+  <h1 class="text-center mb-4 fw-bold">ESP32-S3 DC Motor Controller (Demo Mode)</h1>
 
   <div class="row g-4">
+    <!-- System Temperature -->
     <div class="col-md-4">
       <div class="card">
         <div class="card-header hdr-blue">System temperature</div>
         <div class="card-body text-center">
-          <div class="kpi"><span id="sysTemp">-- °C</span></div>
-          <div class="progress"><div id="sysBar" class="progress-bar bg-primary" style="width:0%"></div></div>
+          <div class="kpi"><span id="systemTemp">-- °C</span></div>
+          <div class="progress position-relative">
+            <div id="systemProgress" class="progress-bar bg-primary" style="width:0%"></div>
+            <span id="systemPercent" class="percent-label position-absolute start-0 ps-3 top-50 translate-middle-y">0%</span>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Engine Temperature -->
     <div class="col-md-4">
       <div class="card">
         <div class="card-header hdr-green">Engine temperature</div>
         <div class="card-body text-center">
-          <div class="kpi"><span id="engTemp">-- °C</span></div>
-          <div class="progress"><div id="engBar" class="progress-bar bg-success" style="width:0%"></div></div>
+          <div class="kpi"><span id="engineTemp">-- °C</span></div>
+          <div class="progress position-relative">
+            <div id="engineProgress" class="progress-bar bg-success" style="width:0%"></div>
+            <span id="enginePercent" class="percent-label position-absolute start-0 ps-3 top-50 translate-middle-y">0%</span>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Fan Power -->
     <div class="col-md-4">
       <div class="card">
         <div class="card-header hdr-amber d-flex justify-content-between align-items-center">
@@ -67,55 +77,128 @@ body {
           <span id="modeBadge" class="badge text-bg-secondary">AUTO</span>
         </div>
         <div class="card-body text-center">
-          <div class="kpi"><span id="fanStatus">OFF</span></div>
-          <div class="progress mb-2"><div id="fanBar" class="progress-bar bg-warning" style="width:0%"></div></div>
-          <button class="btn btn-outline-primary" id="toggleMode">Switch Mode</button>
+          <div class="d-flex justify-content-center align-items-center mb-2">
+            <div class="kpi me-2"><span id="fanStatus">OFF</span></div>
+            <span id="fanPercent" class="fw-bold">0%</span>
+          </div>
+          <div class="progress mb-3"><div id="fanProgress" class="progress-bar bg-warning" style="width:0%"></div></div>
+
+          <div class="btn-group w-100 mb-3" role="group">
+            <input type="radio" class="btn-check" name="fanMode" id="modeAuto" autocomplete="off" checked>
+            <label class="btn btn-outline-dark" for="modeAuto" onclick="setMode('AUTO')">Auto</label>
+
+            <input type="radio" class="btn-check" name="fanMode" id="modeManual" autocomplete="off">
+            <label class="btn btn-outline-dark" for="modeManual" onclick="setMode('MANUAL')">Manual</label>
+          </div>
+
+          <div id="manualControl" class="d-none">
+            <label class="form-label fw-semibold">Manual speed control</label>
+            <div class="progress position-relative" style="height: 30px; cursor: pointer;" onclick="manualBarClick(event)">
+              <div id="manualProgress" class="progress-bar bg-primary" role="progressbar" style="width:0%"></div>
+              <span id="manualValueLabel" class="percent-label position-absolute start-0 ps-3 top-50 translate-middle-y text-white fw-bold">0%</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="mt-5 text-center">
-    <h5 class="text-muted">PWM Frequency</h5>
-    <div class="progress mx-auto" style="max-width:400px;height:30px;">
-      <div id="freqBar" class="progress-bar bg-info" style="width:0%"></div>
+  <!-- PWM Frequency -->
+  <div class="col-12 mt-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-gradient text-white" style="background: linear-gradient(90deg, #4dabf7, #228be6);">
+        <strong>PWM Frequency Control</strong>
+      </div>
+      <div class="card-body text-center">
+        <h5 class="text-muted mb-3">Adjust PWM frequency for demo fan driver</h5>
+        <div class="progress position-relative mx-auto" style="height: 30px; max-width: 500px; cursor: pointer;" onclick="freqBarClick(event)">
+          <div id="freqProgress" class="progress-bar bg-info" style="width:0%"></div>
+          <span id="freqLabel" class="percent-label position-absolute start-50 translate-middle text-white fw-bold">20.0 kHz</span>
+        </div>
+        <div class="d-flex justify-content-between text-secondary small mt-2 mx-auto" style="max-width: 500px;">
+          <span>1 kHz</span><span>75 kHz</span><span>150 kHz</span>
+        </div>
+      </div>
     </div>
-    <p id="freqLabel" class="fw-bold mt-2">-- kHz</p>
   </div>
 
-  <footer class="mt-5 text-center text-muted small">
-    © 2025 <strong>devbmv</strong> – Demo version for GitHub Pages<br>
+  <footer class="mt-5 text-center footer-note">
+    © 2025 <strong>devbmv</strong> – Simulated Demo Mode<br>
     Original project: <a href="https://github.com/devbmv/ESP32-DC-MOTOR-CONTROLLER" target="_blank">ESP32-DC-MOTOR-CONTROLLER</a>
   </footer>
+
 </div>
 
 <script>
-let autoMode = true;
+let mode = "AUTO";
+let manualPercent = 0;
+let pwmFreqHz = 3000;
+let sysTemp = 25, engTemp = 30;
 
-// Generate smooth fake sensor data
-function fakeData() {
-  const sys = 30 + Math.sin(Date.now()/10000)*10 + Math.random()*2;
-  const eng = 40 + Math.cos(Date.now()/8000)*15 + Math.random()*3;
-  const fan = autoMode ? Math.round((eng/100)*100) : Math.round(Math.random()*100);
-  const freq = 1000 + fan*1000;
+// Random smooth simulation
+function simulateData() {
+  const t = Date.now()/1000;
+  sysTemp = 40 + 10 * Math.sin(t/5);
+  engTemp = 60 + 20 * Math.sin(t/7 + 1);
+  const fanPercent = mode === "AUTO" ? Math.min(100, Math.max(0, (engTemp - 40) * 2)) : manualPercent;
+  pwmFreqHz = 1000 + fanPercent * 1000;
 
-  document.getElementById('sysTemp').textContent = sys.toFixed(1) + " °C";
-  document.getElementById('engTemp').textContent = eng.toFixed(1) + " °C";
-  document.getElementById('fanStatus').textContent = fan>10 ? "ON" : "OFF";
-  document.getElementById('freqLabel').textContent = (freq/1000).toFixed(1)+" kHz";
-
-  document.getElementById('sysBar').style.width = Math.min(sys,100)+"%";
-  document.getElementById('engBar').style.width = Math.min(eng,100)+"%";
-  document.getElementById('fanBar').style.width = fan+"%";
-  document.getElementById('freqBar').style.width = (fan)+"%";
-
-  document.getElementById('modeBadge').textContent = autoMode ? "AUTO" : "MANUAL";
+  updateUI(fanPercent);
 }
-setInterval(fakeData, 1200);
 
-document.getElementById('toggleMode').onclick = ()=>{
-  autoMode = !autoMode;
-};
+function updateUI(fanPercent) {
+  // temps
+  document.getElementById("systemTemp").textContent = sysTemp.toFixed(1)+" °C";
+  document.getElementById("engineTemp").textContent = engTemp.toFixed(1)+" °C";
+  document.getElementById("systemProgress").style.width = Math.min(sysTemp,100)+"%";
+  document.getElementById("engineProgress").style.width = Math.min(engTemp,100)+"%";
+  document.getElementById("systemPercent").textContent = Math.round(sysTemp)+"%";
+  document.getElementById("enginePercent").textContent = Math.round(engTemp)+"%";
+
+  // fan
+  document.getElementById("fanStatus").textContent = fanPercent>5 ? "ON" : "OFF";
+  document.getElementById("fanPercent").textContent = fanPercent.toFixed(0)+"%";
+  document.getElementById("fanProgress").style.width = fanPercent+"%";
+
+  document.getElementById("modeBadge").textContent = mode;
+  document.getElementById("modeBadge").className = "badge rounded-pill " + (mode==="AUTO" ? "text-bg-primary" : "text-bg-dark");
+
+  document.getElementById("manualControl").classList.toggle("d-none", mode!=="MANUAL");
+
+  // manual progress
+  if (mode==="MANUAL") {
+    document.getElementById("manualProgress").style.width = manualPercent+"%";
+    document.getElementById("manualValueLabel").textContent = manualPercent+"%";
+  }
+
+  // frequency
+  const freqPct = (pwmFreqHz - 1000) / (150000 - 1000) * 100;
+  document.getElementById("freqProgress").style.width = freqPct+"%";
+  document.getElementById("freqLabel").textContent = formatFreq(pwmFreqHz);
+}
+
+function setMode(val){
+  mode = val;
+  console.log("Mode changed:", val);
+}
+
+function manualBarClick(e){
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = Math.round(((e.clientX - rect.left)/rect.width)*100);
+  manualPercent = pct;
+}
+
+function freqBarClick(e){
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left)/rect.width;
+  pwmFreqHz = 1000 + pct * (150000 - 1000);
+}
+
+function formatFreq(v){
+  return v >= 1000 ? (v/1000).toFixed(1)+" kHz" : v+" Hz";
+}
+
+setInterval(simulateData, 1000);
 </script>
 </body>
 </html>
