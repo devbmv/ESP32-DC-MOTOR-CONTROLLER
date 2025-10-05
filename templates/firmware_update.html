@@ -220,8 +220,8 @@
       <h3>💖 Support This Project</h3>
       <p>If you find this tool useful, consider supporting its development with a small donation:</p>
       <div class="mt-3">
-        <a href="https://revolut.me/maik775" target="_blank" class="btn btn-revolut">💸 Donate via Revolut</a>
-        <a href="https://www.paypal.me/devbmv" target="_blank" class="btn btn-paypal">☕ Support on PayPal</a>
+        <a href="https://revolut.me/mihailuf6d" target="_blank" class="btn btn-revolut">💸 Donate via Revolut</a>
+        <a href="https://buymeacoffee.com/devbmv" target="_blank" class="btn btn-paypal">☕ Support on buy me a coffee</a>
       </div>
       <p class="mt-2 small text-muted">Every contribution helps to improve ESP32 projects. Thank you! 🙏</p>
     </div>
@@ -432,55 +432,29 @@ function deleteFile(filename) {
     .catch(err => showModal("❌ Error deleting file: " + err, false));
 }
 
-/* ============================================================
-   🧠 Show Memory / Partition Info
-============================================================ */
 function showMemory() {
   fetch('/meminfo')
     .then(res => res.json())
     .then(info => {
-      const partEntries = info.partitionTable ? Object.entries(info.partitionTable) : [];
-
       const html = `
         <table class="table table-bordered table-striped table-sm">
           <thead class="table-light">
             <tr><th>Memory</th><th>Value</th></tr>
           </thead>
           <tbody>
-            <tr><td>Free RAM</td><td>${formatBytes(info.heap)}</td></tr>
-            <tr><td>Total RAM</td><td>${formatBytes(info.heapTotal || 0)}</td></tr>
-            <tr><td>Min RAM Reached</td><td>${formatBytes(info.heapMin || 0)}</td></tr>
-            <tr><td>Free PSRAM</td><td>${formatBytes(info.psram || 0)}</td></tr>
-            <tr><td>Total PSRAM</td><td>${formatBytes(info.psramTotal || 0)}</td></tr>
-            <tr><td>Flash Total</td><td>${formatBytes(info.flashSize || 0)}</td></tr>
-            <tr><td>Flash Speed</td><td>${info.flashSpeed || 'N/A'} Hz</td></tr>
-            <tr><td>Flash Mode</td><td>${info.flashMode || 'N/A'}</td></tr>
-            <tr><td>Sketch Used</td><td>${formatBytes(info.sketchSize || 0)}</td></tr>
-            <tr><td>Sketch Free</td><td>${formatBytes(info.sketchFree || 0)}</td></tr>
-            <tr><td>LittleFS Total</td><td>${formatBytes(info.LittleFSTotal || 0)}</td></tr>
-            <tr><td>LittleFS Used</td><td>${formatBytes(info.LittleFSUsed || 0)}</td></tr>
-            <tr><td>LittleFS Free</td><td>${formatBytes(info.LittleFSFree || 0)}</td></tr>
-            <tr><td>CPU Temp</td><td>${(info.cpuTemp || 0).toFixed(1)} °C</td></tr>
-            <tr><td>CPU Freq</td><td>${info.cpuFreq || 'N/A'} MHz</td></tr>
-            <tr><td>Core</td><td>${info.core || 'N/A'}</td></tr>
-            <tr><td>SDK Version</td><td>${info.sdkVersion || 'N/A'}</td></tr>
-            <tr><td>Chip Revision</td><td>${info.chipRevision || 'unknown'}</td></tr>
-          </tbody>
-        </table>
-
-        <h6 class="mt-4">📂 Partitions:</h6>
-        <table class="table table-bordered table-striped table-sm">
-          <thead class="table-light"><tr><th>Label</th><th>Address</th><th>Size</th></tr></thead>
-          <tbody>
-            ${partEntries.length > 0
-              ? partEntries.map(([label, part]) => `
-                <tr>
-                  <td>${label}</td>
-                  <td>${part.address}</td>
-                  <td>${formatBytes(part.size)}</td>
-                </tr>`).join('')
-              : `<tr><td colspan="3" class="text-muted">No partitions available</td></tr>`
-            }
+            <tr><td>Free RAM</td><td>${formatBytes(info.heap_free)}</td></tr>
+            <tr><td>Total RAM</td><td>${formatBytes(info.heap_total)}</td></tr>
+            <tr><td>Min RAM Reached</td><td>${formatBytes(info.heap_min)}</td></tr>
+            <tr><td>Free PSRAM</td><td>${formatBytes(info.psram_free)}</td></tr>
+            <tr><td>Total PSRAM</td><td>${formatBytes(info.psram_total)}</td></tr>
+            <tr><td>Flash Total</td><td>${formatBytes(info.flash_size)}</td></tr>
+            <tr><td>Flash Speed</td><td>${info.flash_speed} Hz</td></tr>
+            <tr><td>Flash Mode</td><td>${info.flash_mode}</td></tr>
+            <tr><td>LittleFS Total</td><td>${formatBytes(info.LittleFS_total)}</td></tr>
+            <tr><td>LittleFS Used</td><td>${formatBytes(info.LittleFS_used)}</td></tr>
+            <tr><td>CPU Freq</td><td>${info.cpu_freq_mhz} MHz</td></tr>
+            <tr><td>SDK Version</td><td>${info.sdk_version}</td></tr>
+            <tr><td>Chip Revision</td><td>${info.chip_rev}</td></tr>
           </tbody>
         </table>`;
 
@@ -492,9 +466,8 @@ function showMemory() {
     });
 }
 
-/* ============================================================
-   🧩 File input listener to show selected name
-============================================================ */
+
+
 document.getElementById('firmware').addEventListener('change', function () {
   const file = this.files[0];
   const status = document.getElementById('fwStatus');

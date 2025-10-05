@@ -316,7 +316,10 @@ bool isAuthenticated(AsyncWebServerRequest *request)
 void initUart()
 {
   Serial.begin(115200);
-  delay(100);
+  unsigned long start = millis();
+  while (!Serial && millis() - start < 1000)
+    ; // așteaptă până portul e gata sau 1s timeout
+  Serial.println("✅ Serial initialized at 115200 baud");
 }
 
 void initDallas()
@@ -348,7 +351,7 @@ void initPins()
   pinMode(system_temp_pin, INPUT);
   pinMode(fan_control_pin, OUTPUT);
   digitalWrite(fan_control_pin, LOW);
-  delay(10);
+  delay(50);
 }
 
 void initADC()
@@ -362,7 +365,7 @@ void reinitPwm(int channel, int freq_hz, int resolution_bits, bool invert)
 {
   ledcDetachPin(fan_control_pin);
   ledcSetup(g_settings.pwm_channel, g_settings.pwm_freq_hz, g_settings.pwm_resolution_bits);
-  ledcAttachPin(fan_control_pin, channel);
+  ledcAttachPin(fan_control_pin, g_settings.pwm_channel);
   ledcWrite(channel, 0);
 }
 
@@ -526,7 +529,6 @@ void read_engine_temp()
     if (temp != DEVICE_DISCONNECTED_C)
     {
       sensorData.engineC = temp;
-      LOGI("Engine Temp=%.2f C", temp);
     }
     else
     {

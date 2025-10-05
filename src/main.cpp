@@ -16,14 +16,18 @@ void setup()
 {
     initUart();
     initCommands();
-    setupTime();
 
     LOGI("Boot start, heap=%.1f KB", heap_kb());
 
     // --- Hardware initialization ---
     initPins();
-    LOGI("Pins init OK");
 
+    LOGI("Pins init OK");
+    reinitPwm(
+        g_settings.pwm_channel,
+        g_settings.pwm_freq_hz,
+        g_settings.pwm_resolution_bits,
+        g_settings.invert_pwm);
     initADC();
     LOGI("ADC init OK");
 
@@ -47,6 +51,8 @@ void setup()
 
     // --- Wi-Fi setup ---
     initWiFi();
+    setupTime();
+
     LOGI("WiFi connected=%s, SSID=%s, IP=%s, RSSI=%d",
          WiFi.isConnected() ? "true" : "false",
          WiFi.SSID().c_str(), WiFi.localIP().toString().c_str(), WiFi.RSSI());

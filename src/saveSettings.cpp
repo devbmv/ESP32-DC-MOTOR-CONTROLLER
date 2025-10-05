@@ -30,6 +30,8 @@ void fillJsonFrom(const SystemSettings &s, JsonDocument &doc)
     doc["temp_sample_interval_ms"] = s.temp_sample_interval_ms;
     doc["adc_samples"] = s.adc_samples;
     doc["temp_sensor_type"] = s.temp_sensor_type;
+    doc["alarmTriggered"] = s.alarmTriggered;
+    doc["reactivateAlarmCounter"] = s.reactivateAlarmCounter;
 
     // --- Fan Control ---
     switch (s.fan_mode)

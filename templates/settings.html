@@ -1,44 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-      <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" >
-  <!-- 🔍 SEO Meta Tags -->
-<meta name="description" content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
-<meta name="keywords" content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
-<meta name="author" content="devbmv">
-<meta name="robots" content="index, follow">
-<meta name="theme-color" content="#0d6efd">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 🔍 SEO Meta Tags -->
+    <meta name="description"
+        content="ESP32-S3 Smart DC Motor Controller for automotive cooling systems and other DC control applications. Includes temperature sensors, PWM fan control, CAN integration, and web interface.">
+    <meta name="keywords"
+        content="ESP32, ATOM S3 Lite, DC motor controller, fan controller, automotive cooling, PWM control, CAN bus, Dallas DS18B20, NTC sensor, MIC4422, IRFP4568, CJMCU, DFR1010, ESP32S3 project">
+    <meta name="author" content="devbmv">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#0d6efd">
 
-<!-- 🔗 Social & Sharing -->
-<meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
-<meta property="og:description" content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
-<meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
-<meta property="og:url" content="https://your-esp32.local/">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
-<meta name="twitter:description" content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
-<meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+    <!-- 🔗 Social & Sharing -->
+    <meta property="og:title" content="ESP32-S3 Universal DC Motor Controller – Smart Automotive Cooling">
+    <meta property="og:description"
+        content="Open-source ESP32-S3 controller for DC motor applications such as automotive cooling fans, pumps, and other temperature-driven systems. Includes PWM control, CAN bus, and web dashboard.">
+    <meta property="og:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
+    <meta property="og:url" content="https://devbmv.github.io/ESP32-DC-MOTOR-CONTROLLER/settings.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ESP32-S3 DC Motor Controller – Automotive Cooling System">
+    <meta name="twitter:description"
+        content="ESP32-S3 based universal DC motor controller for automotive and industrial projects.">
+    <meta name="twitter:image" content="https://www.svgrepo.com/show/530433/temperature.svg">
 
-  <link rel="stylesheet" href="/bootstrap.min.css">
-  <link rel="stylesheet" href="/style.css">
-  <script src="/bootstrap.bundle.min.js"></script>
-  <meta charset="UTF-8">
-  <title>ESP Control Panel</title>
+    <link rel="stylesheet" href="/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <script src="/bootstrap.bundle.min.js"></script>
+    <meta charset="UTF-8">
+    <title>ESP Control Panel</title>
 
 </head>
 
 
 <body>
-  <!-- include navbar.html -->
-  <div id="navbarContainer"></div>
-  <script>
-    fetch('/navbar', { cache: 'no-store' })
-      .then(res => res.text())
-      .then(html => document.getElementById("navbarContainer").innerHTML = html)
-      .catch(err => console.error("Eroare la încărcarea navbar:", err));
-  </script>
+    <!-- include navbar.html -->
+    <div id="navbarContainer"></div>
+    <script>
+        fetch('/navbar', { cache: 'no-store' })
+            .then(res => res.text())
+            .then(html => document.getElementById("navbarContainer").innerHTML = html)
+            .catch(err => console.error("Eroare la încărcarea navbar:", err));
+    </script>
 
     <div class="container py-3">
         <div class="page-title">
@@ -46,7 +51,7 @@
             <span id="saveBadge" class="badge rounded-pill text-bg-secondary">Not saved</span>
             <div class="ms-auto">
                 <button class="btn btn-outline-dark" id="btnDark" onclick="toggleDark()">🌙 Dark</button>
-                <a href="/index" class="btn btn-outline-primary">🏠 Dashboard</a>
+                <a href="/index.html" class="btn btn-outline-primary">🏠 Dashboard</a>
             </div>
         </div>
 
@@ -236,113 +241,134 @@
 
 
     <script>
-        // ---- Dark Mode persist ----
-        (function initDark() {
-            const saved = localStorage.getItem('dark-mode') === '1';
-            document.body.classList.toggle('dark-mode', saved);
-            const btn = document.getElementById('btnDark');
-            if (btn) {
-                btn.classList.toggle('btn-outline-light', saved);
-                btn.classList.toggle('btn-outline-dark', !saved);
-                btn.textContent = saved ? '☀️ Light' : '🌙 Dark';
-            }
-        })();
-
-        function toggleDark() {
-            const on = !document.body.classList.contains('dark-mode');
-            document.body.classList.toggle('dark-mode', on);
-            localStorage.setItem('dark-mode', on ? '1' : '0');
-            const btn = document.getElementById('btnDark');
-            btn.classList.toggle('btn-outline-light', on);
-            btn.classList.toggle('btn-outline-dark', !on);
-            btn.textContent = on ? '☀️ Light' : '🌙 Dark';
-        }
-
-        // ---- Helpers ----
-        const ids = [
-            'hostname', 'log_level', 'telemetry_enabled', 'fs_format_on_fail',
-            'wifi_ssid', 'wifi_pass', 'ota_enabled', 'ota_url',
-            'min_rotation_temp', 'max_rotation_temp', 'system_temp_alert', 'temp_sample_interval_ms', 'adc_samples', 'temp_sensor_type',
-            'fan_control_interval', 'fan_start_boost_ms', 'pwm_freq_hz', 'pwm_channel', 'pwm_resolution_bits', 'invert_pwm', 'manual_on', 'manual_percent',
-            'ui_system_min', 'ui_system_max', 'ui_engine_min', 'ui_engine_max'
-        ];
-
-        function setSavedBadge(ok) {
-            const b = document.getElementById('saveBadge');
-            if (!b) return;
-            b.className = 'badge rounded-pill ' + (ok ? 'text-bg-success' : 'text-bg-danger');
-            b.textContent = ok ? 'Saved' : 'Error';
-            setTimeout(() => {
-                b.className = 'badge rounded-pill text-bg-secondary';
-                b.textContent = 'Not saved';
-            }, 2000);
-        }
-
-        // ---- Load settings ----
-        document.addEventListener('DOMContentLoaded', loadSettings);
-
-        function loadSettings() {
-            fetch('/api/settings', { cache: 'no-store' })
-                .then(r => r.json())
-                .then(cfg => {
-                    ids.forEach(id => {
-                        const el = document.getElementById(id);
-                        if (!el) return;
-                        const val = cfg[id];
-                        if (el.type === 'checkbox') el.checked = !!val;
-                        else el.value = (val === undefined || val === null) ? '' : val;
-                    });
-                })
-                .catch(() => setSavedBadge(false));
-        }
-
-        function loadDefaults() {
-            fetch('/api/settings/defaults', { cache: 'no-store' })
-                .then(r => r.json())
-                .then(cfg => {
-                    ids.forEach(id => {
-                        const el = document.getElementById(id);
-                        if (!el) return;
-                        const val = cfg[id];
-                        if (el.type === 'checkbox') el.checked = !!val;
-                        else el.value = (val === undefined || val === null) ? '' : val;
-                    });
-                    setSavedBadge(true);
-                })
-                .catch(() => setSavedBadge(false));
-        }
-
-function saveSettings() {
-  const payload = {
-    hostname: document.getElementById("hostname").value,
-    // … adaugi restul câmpurilor
-  };
-
-  fetch('/api/settings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-    .then(r => r.json())
-    .then(res => {
-      if (res.ok) {
-        showModal("✅ Settings saved successfully!", true);
-      } else {
-        showModal("⚠️ Failed to save settings.", false);
+  // ---- Dark Mode persist ----
+  (function initDark() {
+      const saved = localStorage.getItem('dark-mode') === '1';
+      document.body.classList.toggle('dark-mode', saved);
+      const btn = document.getElementById('btnDark');
+      if (btn) {
+          btn.classList.toggle('btn-outline-light', saved);
+          btn.classList.toggle('btn-outline-dark', !saved);
+          btn.textContent = saved ? '☀️ Light' : '🌙 Dark';
       }
-    })
-    .catch(err => {
-      console.error("❌ Error:", err);
-      showModal("❌ Network error while saving.", false);
-    });
-}
+  })();
 
+  function toggleDark() {
+      const on = !document.body.classList.contains('dark-mode');
+      document.body.classList.toggle('dark-mode', on);
+      localStorage.setItem('dark-mode', on ? '1' : '0');
+      const btn = document.getElementById('btnDark');
+      btn.classList.toggle('btn-outline-light', on);
+      btn.classList.toggle('btn-outline-dark', !on);
+      btn.textContent = on ? '☀️ Light' : '🌙 Dark';
+  }
 
-        function restartESP() {
-            fetch('/restart', { cache: 'no-store' }).catch(() => { });
-        }
-    </script>
+  // ---- Helpers ----
+  const ids = [
+      'hostname', 'log_level', 'telemetry_enabled', 'fs_format_on_fail',
+      'wifi_ssid', 'wifi_pass', 'ota_enabled', 'ota_url',
+      'min_rotation_temp', 'max_rotation_temp', 'system_temp_alert', 'temp_sample_interval_ms', 'adc_samples', 'temp_sensor_type',
+      'fan_control_interval', 'fan_start_boost_ms', 'pwm_freq_hz', 'pwm_channel', 'pwm_resolution_bits', 'invert_pwm', 'manual_on', 'manual_percent',
+      'ui_system_min', 'ui_system_max', 'ui_engine_min', 'ui_engine_max'
+  ];
+
+  function setSavedBadge(ok) {
+      const b = document.getElementById('saveBadge');
+      if (!b) return;
+      b.className = 'badge rounded-pill ' + (ok ? 'text-bg-success' : 'text-bg-danger');
+      b.textContent = ok ? 'Saved' : 'Error';
+      setTimeout(() => {
+          b.className = 'badge rounded-pill text-bg-secondary';
+          b.textContent = 'Not saved';
+      }, 2000);
+  }
+
+  // ---- Load settings ----
+  document.addEventListener('DOMContentLoaded', loadSettings);
+
+  function loadSettings() {
+      fetch('/api/settings', { cache: 'no-store' })
+          .then(r => r.json())
+          .then(cfg => {
+              ids.forEach(id => {
+                  const el = document.getElementById(id);
+                  if (!el) return;
+                  const val = cfg[id];
+                  if (el.type === 'checkbox') el.checked = !!val;
+                  else el.value = (val === undefined || val === null) ? '' : val;
+              });
+              showModal("✅ Settings loaded successfully!", true);
+          })
+          .catch(() => {
+              setSavedBadge(false);
+              showModal("❌ Failed to load settings from ESP.", false);
+          });
+  }
+
+  function loadDefaults() {
+      fetch('/api/settings/defaults', { cache: 'no-store' })
+          .then(r => r.json())
+          .then(cfg => {
+              ids.forEach(id => {
+                  const el = document.getElementById(id);
+                  if (!el) return;
+                  const val = cfg[id];
+                  if (el.type === 'checkbox') el.checked = !!val;
+                  else el.value = (val === undefined || val === null) ? '' : val;
+              });
+              setSavedBadge(true);
+              showModal("⚙️ Default settings loaded.", true);
+          })
+          .catch(() => {
+              setSavedBadge(false);
+              showModal("❌ Failed to load default settings.", false);
+          });
+  }
+
+  function saveSettings() {
+      const payload = {};
+      ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (el.type === 'checkbox') payload[id] = el.checked;
+          else if (el.type === 'number' || el.type === 'range') payload[id] = Number(el.value);
+          else payload[id] = el.value;
+      });
+
+      fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+      })
+          .then(r => r.json())
+          .then(res => {
+              if (res.ok) {
+                  setSavedBadge(true);
+                  showModal("✅ Settings saved successfully!", true);
+              } else {
+                  setSavedBadge(false);
+                  showModal("⚠️ Failed to save settings on ESP.", false);
+              }
+          })
+          .catch(() => {
+              setSavedBadge(false);
+              showModal("❌ Network error while saving settings.", false);
+          });
+  }
+
+  function restartESP() {
+      fetch('/restart', { cache: 'no-store' })
+          .then(() => {
+              showModal("🔄 ESP is restarting... Please wait 5 seconds.", true);
+          })
+          .catch(() => {
+              showModal("❌ Restart failed. Try again later.", false);
+          });
+  }
+</script>
+
     <script src="bootstrap.bundle.min.js"></script>
+    <script src="/global.js"></script>
 
 </body>
 

@@ -1,11 +1,22 @@
 
 # ⚙️ ESP32-S3 DC MOTOR CONTROLLER
+---
+
+### 🌐 **Live Demo (GitHub Pages)**
+👉 [Open the ESP32-S3 DC Motor Controller Demo](https://devbmv.github.io/ESP32-DC-MOTOR-CONTROLLER/)
+
+> 💡 This is a standalone simulated dashboard — only the main page is functional; no hardware required.
+
+---
+
+
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![PlatformIO](https://img.shields.io/badge/Built%20with-PlatformIO-orange.svg)
 ![ESP32-S3](https://img.shields.io/badge/ESP32--S3-Ready-brightgreen.svg)
 
 
 - [⚙️ ESP32-S3 DC MOTOR CONTROLLER](#️-esp32-s3-dc-motor-controller)
+    - [🌐 **Live Demo (GitHub Pages)**](#-live-demo-github-pages)
     - [🔋 Smart ESP32-S3 DC Motor Controller for Automotive Cooling Fans and DIY Automation](#-smart-esp32-s3-dc-motor-controller-for-automotive-cooling-fans-and-diy-automation)
   - [🌍 Project Overview](#-project-overview)
   - [🧠 Keywords (SEO)](#-keywords-seo)
