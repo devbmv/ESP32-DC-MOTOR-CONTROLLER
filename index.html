@@ -5,18 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>ESP32-S3 DC Motor Controller – Demo</title>
-<meta name="description" content="Demo version of the ESP32-S3 Smart DC Motor Controller – Fully simulated without ESP hardware.">
-<meta name="keywords" content="ESP32, DC motor controller, demo, PWM, fan, temperature, automotive, web dashboard">
+<meta name="description" content="Standalone demo of the ESP32-S3 Smart DC Motor Controller UI – fully simulated, no hardware required.">
+<meta name="keywords" content="ESP32, DC motor controller, devbmv, PWM, CAN, Bootstrap, IoT demo">
 <meta name="author" content="devbmv">
 <meta name="robots" content="index, follow">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
 <style>
 body {
   background: radial-gradient(1200px 600px at 10% -10%, #e3f2fd 0, #fff 60%);
   min-height: 100vh;
+  transition: background 0.5s ease, color 0.3s ease;
 }
+.dark-mode { background:#121212;color:#e0e0e0; }
+
 .card {
   border: 0;
   border-radius: 1rem;
@@ -32,16 +34,84 @@ body {
 .progress{height:28px;}
 .percent-label { font-weight:700; }
 .footer-note { color:#6c757d;font-size:.9rem; }
+
+/* Floating Donate Buttons */
+#donate-float-container {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  display: flex;
+  gap: 10px;
+  z-index: 1050;
+}
+#donate-float-container a {
+  width: 58px; height: 58px;
+  font-size: 1.5rem;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#donate-float-container a:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 18px rgba(255, 193, 7, 0.7);
+}
 </style>
 </head>
 
 <body>
+
+<!-- 🌐 Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold text-info" href="#">⚙️ ESP32-S3 DC MOTOR CONTROLLER</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link active" href="#">Main Page</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Log</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Fan</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">WiFi Info</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">System Info</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" id="authLink">🔐 Login</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">System Settings</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Firmware</a></li>
+      </ul>
+      <button id="toggleDarkMode" class="btn btn-outline-light ms-auto">🌙 Dark</button>
+    </div>
+  </div>
+</nav>
+
+<!-- 📢 Modal global -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow rounded-4">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="feedbackLabel">ℹ️ ESP Notification</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="feedbackBody"></div>
+      </div>
+      <div class="modal-footer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ☕ + 💳 Floating Donate Buttons -->
+<div id="donate-float-container">
+  <a href="https://buymeacoffee.com/devbmv" target="_blank" class="btn btn-warning shadow-lg" title="☕ Buy Me a Coffee">☕</a>
+  <a href="https://revolut.me/mihailuf6d" target="_blank" class="btn btn-success shadow-lg" title="💳 Donate via Revolut">💳</a>
+</div>
+
+<!-- 🌡 Main Content -->
 <div class="container py-4">
 
   <h1 class="text-center mb-4 fw-bold">ESP32-S3 DC Motor Controller (Demo Mode)</h1>
 
   <div class="row g-4">
-    <!-- System Temperature -->
+    <!-- System Temp -->
     <div class="col-md-4">
       <div class="card">
         <div class="card-header hdr-blue">System temperature</div>
@@ -55,7 +125,7 @@ body {
       </div>
     </div>
 
-    <!-- Engine Temperature -->
+    <!-- Engine Temp -->
     <div class="col-md-4">
       <div class="card">
         <div class="card-header hdr-green">Engine temperature</div>
@@ -94,7 +164,7 @@ body {
           <div id="manualControl" class="d-none">
             <label class="form-label fw-semibold">Manual speed control</label>
             <div class="progress position-relative" style="height: 30px; cursor: pointer;" onclick="manualBarClick(event)">
-              <div id="manualProgress" class="progress-bar bg-primary" role="progressbar" style="width:0%"></div>
+              <div id="manualProgress" class="progress-bar bg-primary" style="width:0%"></div>
               <span id="manualValueLabel" class="percent-label position-absolute start-0 ps-3 top-50 translate-middle-y text-white fw-bold">0%</span>
             </div>
           </div>
@@ -123,31 +193,43 @@ body {
   </div>
 
   <footer class="mt-5 text-center footer-note">
-    © 2025 <strong>devbmv</strong> – Simulated Demo Mode<br>
-    Original project: <a href="https://github.com/devbmv/ESP32-DC-MOTOR-CONTROLLER" target="_blank">ESP32-DC-MOTOR-CONTROLLER</a>
+    © 2025 <strong>devbmv</strong> – Simulated Demo<br>
+    Original project: <a href="https://github.com/devbmv/ESP32-DC-MOTOR-CONTROLLER" target="_blank">GitHub Repository</a>
   </footer>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+// === Navbar + Dark Mode ===
+const toggleBtn = document.getElementById('toggleDarkMode');
+toggleBtn.addEventListener('click', () => {
+  const dark = !document.body.classList.contains('dark-mode');
+  document.body.classList.toggle('dark-mode', dark);
+  toggleBtn.textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('dark-mode', dark);
+});
+if (localStorage.getItem('dark-mode') === 'true') {
+  document.body.classList.add('dark-mode');
+  toggleBtn.textContent = '☀️ Light';
+}
+
+// === Demo Logic ===
 let mode = "AUTO";
 let manualPercent = 0;
 let pwmFreqHz = 3000;
 let sysTemp = 25, engTemp = 30;
 
-// Random smooth simulation
 function simulateData() {
   const t = Date.now()/1000;
   sysTemp = 40 + 10 * Math.sin(t/5);
   engTemp = 60 + 20 * Math.sin(t/7 + 1);
   const fanPercent = mode === "AUTO" ? Math.min(100, Math.max(0, (engTemp - 40) * 2)) : manualPercent;
   pwmFreqHz = 1000 + fanPercent * 1000;
-
   updateUI(fanPercent);
 }
 
 function updateUI(fanPercent) {
-  // temps
   document.getElementById("systemTemp").textContent = sysTemp.toFixed(1)+" °C";
   document.getElementById("engineTemp").textContent = engTemp.toFixed(1)+" °C";
   document.getElementById("systemProgress").style.width = Math.min(sysTemp,100)+"%";
@@ -155,23 +237,16 @@ function updateUI(fanPercent) {
   document.getElementById("systemPercent").textContent = Math.round(sysTemp)+"%";
   document.getElementById("enginePercent").textContent = Math.round(engTemp)+"%";
 
-  // fan
   document.getElementById("fanStatus").textContent = fanPercent>5 ? "ON" : "OFF";
   document.getElementById("fanPercent").textContent = fanPercent.toFixed(0)+"%";
   document.getElementById("fanProgress").style.width = fanPercent+"%";
-
   document.getElementById("modeBadge").textContent = mode;
   document.getElementById("modeBadge").className = "badge rounded-pill " + (mode==="AUTO" ? "text-bg-primary" : "text-bg-dark");
-
   document.getElementById("manualControl").classList.toggle("d-none", mode!=="MANUAL");
-
-  // manual progress
   if (mode==="MANUAL") {
     document.getElementById("manualProgress").style.width = manualPercent+"%";
     document.getElementById("manualValueLabel").textContent = manualPercent+"%";
   }
-
-  // frequency
   const freqPct = (pwmFreqHz - 1000) / (150000 - 1000) * 100;
   document.getElementById("freqProgress").style.width = freqPct+"%";
   document.getElementById("freqLabel").textContent = formatFreq(pwmFreqHz);
@@ -179,25 +254,28 @@ function updateUI(fanPercent) {
 
 function setMode(val){
   mode = val;
-  console.log("Mode changed:", val);
+  showModal("Mode switched to "+val, true);
 }
-
 function manualBarClick(e){
   const rect = e.currentTarget.getBoundingClientRect();
   const pct = Math.round(((e.clientX - rect.left)/rect.width)*100);
   manualPercent = pct;
+  showModal("Manual speed set to "+pct+"%", true);
 }
-
 function freqBarClick(e){
   const rect = e.currentTarget.getBoundingClientRect();
   const pct = (e.clientX - rect.left)/rect.width;
   pwmFreqHz = 1000 + pct * (150000 - 1000);
+  showModal("PWM frequency set to "+formatFreq(pwmFreqHz), true);
 }
-
 function formatFreq(v){
   return v >= 1000 ? (v/1000).toFixed(1)+" kHz" : v+" Hz";
 }
-
+function showModal(msg, success=true){
+  document.getElementById('feedbackBody').innerHTML = msg;
+  document.getElementById('feedbackLabel').textContent = success ? "✅ Success" : "❌ Error";
+  new bootstrap.Modal(document.getElementById('feedbackModal')).show();
+}
 setInterval(simulateData, 1000);
 </script>
 </body>
