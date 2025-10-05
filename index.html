@@ -24,9 +24,7 @@ body {
   border-radius: 1rem;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
-.card-header {
-  font-weight: 600;
-}
+.card-header { font-weight: 600; }
 .hdr-blue { background: linear-gradient(90deg,#0d6efd,#4dabf7);color:#fff;}
 .hdr-green{ background:linear-gradient(90deg,#198754,#51cf66);color:#fff;}
 .hdr-amber{ background:linear-gradient(90deg,#f59f00,#ffd43b);color:#2b2b2b;}
@@ -217,7 +215,7 @@ if (localStorage.getItem('dark-mode') === 'true') {
 // === Demo Logic ===
 let mode = "AUTO";
 let manualPercent = 0;
-let pwmFreqHz = 3000;
+let pwmFreqHz = 20000;  // default 20 kHz
 let sysTemp = 25, engTemp = 30;
 
 function simulateData() {
@@ -225,7 +223,6 @@ function simulateData() {
   sysTemp = 40 + 10 * Math.sin(t/5);
   engTemp = 60 + 20 * Math.sin(t/7 + 1);
   const fanPercent = mode === "AUTO" ? Math.min(100, Math.max(0, (engTemp - 40) * 2)) : manualPercent;
-  pwmFreqHz = 1000 + fanPercent * 1000;
   updateUI(fanPercent);
 }
 
@@ -247,6 +244,7 @@ function updateUI(fanPercent) {
     document.getElementById("manualProgress").style.width = manualPercent+"%";
     document.getElementById("manualValueLabel").textContent = manualPercent+"%";
   }
+
   const freqPct = (pwmFreqHz - 1000) / (150000 - 1000) * 100;
   document.getElementById("freqProgress").style.width = freqPct+"%";
   document.getElementById("freqLabel").textContent = formatFreq(pwmFreqHz);
@@ -266,6 +264,7 @@ function freqBarClick(e){
   const rect = e.currentTarget.getBoundingClientRect();
   const pct = (e.clientX - rect.left)/rect.width;
   pwmFreqHz = 1000 + pct * (150000 - 1000);
+  updateUI(mode === "AUTO" ? Math.min(100, Math.max(0, (engTemp - 40) * 2)) : manualPercent);
   showModal("PWM frequency set to "+formatFreq(pwmFreqHz), true);
 }
 function formatFreq(v){
