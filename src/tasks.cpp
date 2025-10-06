@@ -65,12 +65,12 @@ void taskControl(void *pvParameters) {
             // Apply new PWM value
             ledcWrite(g_settings.pwm_channel, sensorData.target_pwm);
 
-            // Log unified fan status
-            LOGI("[FAN] mode=%s pct=%d pwm=%d/%d",
-                 (g_settings.fan_mode == FanMode::AUTO ? "AUTO" : "MANUAL"),
-                 sensorData.targetPercent,
-                 sensorData.target_pwm,
-                 pwm_max());
+            // // Log unified fan status
+            // LOGI("[FAN] mode=%s pct=%d pwm=%d/%d",
+            //      (g_settings.fan_mode == FanMode::AUTO ? "AUTO" : "MANUAL"),
+            //      sensorData.targetPercent,
+            //      sensorData.target_pwm,
+            //      pwm_max());
         }
 
         vTaskDelay(pdMS_TO_TICKS(20)); // Loop every 20 ms

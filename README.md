@@ -99,12 +99,29 @@
     - [🧠 How It Works](#-how-it-works-1)
     - [🔧 Key Functions](#-key-functions-1)
     - [📁 Example Stored File (`/settings.json`)](#-example-stored-file-settingsjson)
-- [PlatformIO build files](#platformio-build-files)
-- [Python virtual environment](#python-virtual-environment)
-- [System files](#system-files)
-- [Temp and backup](#temp-and-backup)
-- [Local config](#local-config)
-- [Compiled binaries](#compiled-binaries)
+- [⚡ Features and Control](#-features-and-control)
+    - [🌡 Temperature Monitoring](#-temperature-monitoring)
+    - [🌬️ Fan Control](#️-fan-control)
+    - [🔌 Hardware CAN Bus *(future feature)*](#-hardware-can-bus-future-feature)
+    - [🌍 Web Dashboard](#-web-dashboard)
+    - [💾 LittleFS Storage](#-littlefs-storage)
+    - [🧱 OTA Update](#-ota-update)
+    - [🔔 Logs \& Debug](#-logs--debug)
+  - [🧩 Firmware Functionalities Overview](#-firmware-functionalities-overview)
+    - [🧭 Serial Console Commands](#-serial-console-commands)
+      - [🔹 Available Commands](#-available-commands)
+    - [⚙️ System Initialization Modules](#️-system-initialization-modules)
+    - [🌡 Temperature Reading](#-temperature-reading)
+    - [🕹 Fan Control and PWM](#-fan-control-and-pwm)
+    - [📡 CAN (TWAI) Bus Integration](#-can-twai-bus-integration)
+    - [💾 Core Dump and Diagnostics](#-core-dump-and-diagnostics)
+    - [💡 LED Status](#-led-status)
+    - [🔁 Timed Execution](#-timed-execution)
+    - [☎️ CallMeBot WhatsApp Integration](#️-callmebot-whatsapp-integration)
+    - [🔐 Authentication (Web Sessions)](#-authentication-web-sessions)
+    - [🧠 Utilities](#-utilities)
+  - [🧰 Example API Endpoints](#-example-api-endpoints)
+  - [🧱 .gitignore Example](#-gitignore-example)
   - [👨‍💻 Author](#-author)
   - [💖 Support This Project](#-support-this-project-1)
     - [💡 Suggestions \& Collaboration](#-suggestions--collaboration)
@@ -1104,7 +1121,7 @@ The controller saves all user and system configuration parameters in **LittleFS*
 }
 
 
-
+```
 
 
 # ⚡ Features and Control
